@@ -19,7 +19,7 @@ internal class JpaOrderGateway internal constructor(private val orderJpaReposito
     override fun getOrders(): Flux<Order> {
         return Mono.fromCallable { orderJpaRepository.findAll().map { it.toDomain() } }
                 .publishOn(scheduler)
-                .flatMapIterable { it }
+                .flatMapIterable { it }.log()
     }
 
     internal fun OrderEntity.toDomain() : Order {

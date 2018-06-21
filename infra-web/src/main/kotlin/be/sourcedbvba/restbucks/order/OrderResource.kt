@@ -1,6 +1,7 @@
 package be.sourcedbvba.restbucks.order
 
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -17,22 +18,24 @@ internal class OrderResource(val createOrder: CreateOrder,
 
     @PostMapping(produces = arrayOf("application/hal+json"))
     @ResponseStatus(HttpStatus.CREATED)
-    fun createOrder(@RequestBody createOrderRequest: Mono<CreateOrderRequest>) : Mono<CreateOrderResponseBody> {
-        return createOrder.create(createOrderRequest) {
-            it.toResponseBody()
-        }
+    fun createOrder(@RequestBody createOrderRequest: Mono<CreateOrderRequest>) : ResponseEntity<*> {
+        val receiver = CreateOrderJsonReceiver()
+        createOrder.create(createOrderRequest, receiver)
+        return receiver.result
     }
 
     @GetMapping
-    fun getOrders() : Flux<GetOrdersResponseBody> {
-        return getOrders.getOrders {it.toResponseBody()}
+    fun getOrders() : ResponseEntity<*> {
+        val receiver = GetOrdersJsonReceiver()
+        getOrders.getOrders(receiver)
+        return receiver.result
     }
 
     @GetMapping("/{orderId}/status")
-    fun getOrderStatus(@PathVariable orderId: String): Mono<String> {
-        return getOrderStatus.getStatus(GetOrderStatusRequest(orderId)) {
-            it.status.name.toLowerCase()
-        }
+    fun getOrderStatus(@PathVariable orderId: String): ResponseEntity<*> {
+        val receiver = GetOrderStatusJsonReceiver()
+        getOrderStatus.getStatus(GetOrderStatusRequest(orderId), receiver)
+        return receiver.result
     }
 
     @PostMapping("/{orderId}/payment")
@@ -49,6 +52,33 @@ internal class OrderResource(val createOrder: CreateOrder,
     @PostMapping("/{orderId}/delivery")
     fun deliverOrder(@PathVariable orderId: String) {
         deliverOrder.deliver(DeliverOrderRequest(orderId))
+    }
+}
+
+class GetOrdersJsonReceiver : GetOrdersReceiver {
+    lateinit var result : ResponseEntity<*>
+        private set
+
+    override fun receive(response: Flux<GetOrdersResponse>) {
+        result = ResponseEntity.ok(response.map { it.toResponseBody() })
+    }
+}
+
+class CreateOrderJsonReceiver : CreateOrderReceiver {
+    lateinit var result : ResponseEntity<*>
+        private set
+
+    override fun receive(response: Mono<CreateOrderResponse>) {
+        result = ResponseEntity.ok(response.map { it.toResponseBody() })
+    }
+}
+
+class GetOrderStatusJsonReceiver: GetOrderStatusReceiver {
+    lateinit var result : ResponseEntity<*>
+        private set
+
+    override fun receive(response: Mono<GetOrderStatusResponse>) {
+        result = ResponseEntity.ok(response.map { it.status })
     }
 }
 

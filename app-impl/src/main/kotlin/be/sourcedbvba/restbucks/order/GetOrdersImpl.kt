@@ -6,13 +6,8 @@ import reactor.core.publisher.Flux
 
 @UseCase
 internal class GetOrdersImpl(val orderGateway: OrderGateway) : GetOrders {
-    override fun <T> getOrders(presenter: (GetOrdersResponse) -> T): Flux<T> {
-        return orderGateway.getOrders()
-                .map { presenter(it.toResponse()) }
-//        val list = orderGateway.getOrders()
-//                .map { presenter(it.toResponse()) }
-//                .collectList().block()!!
-//        return Flux.fromIterable(list)
+    override fun getOrders(presenter: GetOrdersReceiver) {
+        presenter.receive(orderGateway.getOrders().map { it.toResponse() })
     }
 
     private fun Order.toResponse() : GetOrdersResponse {

@@ -4,8 +4,12 @@ import be.sourcedbvba.restbucks.Status
 import reactor.core.publisher.Mono
 
 interface GetOrderStatus {
-    fun <T> getStatus(request: GetOrderStatusRequest, presenter: (GetOrderStatusResponse) -> T) : Mono<T>
+    fun getStatus(request: GetOrderStatusRequest, presenter: GetOrderStatusReceiver)
 }
 
 data class GetOrderStatusRequest(val orderId: String)
 data class GetOrderStatusResponse(val status: Status)
+
+interface GetOrderStatusReceiver {
+    fun receive(response: Mono<GetOrderStatusResponse>)
+}

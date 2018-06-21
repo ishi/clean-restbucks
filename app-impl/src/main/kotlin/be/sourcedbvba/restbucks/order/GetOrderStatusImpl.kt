@@ -6,8 +6,8 @@ import reactor.core.publisher.Mono
 
 @UseCase
 internal class GetOrderStatusImpl(val orderGateway: OrderGateway) : GetOrderStatus {
-    override fun <T> getStatus(request: GetOrderStatusRequest, presenter: (GetOrderStatusResponse) -> T): Mono<T> {
+    override fun getStatus(request: GetOrderStatusRequest, presenter: GetOrderStatusReceiver) {
         val order = orderGateway.getOrder(request.orderId)
-        return order.map { presenter(GetOrderStatusResponse(it.status)) }
+        presenter.receive(order.map { GetOrderStatusResponse(it.status) })
     }
 }

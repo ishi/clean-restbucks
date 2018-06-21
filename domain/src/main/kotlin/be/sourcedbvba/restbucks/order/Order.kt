@@ -10,19 +10,15 @@ import java.util.*
 
 class Order(val id: String,
                      val customer: String,
-                     status: Status,
+                     private var _status: Status,
                      val items: List<OrderItem>) {
-    lateinit var cost : BigDecimal
-        private set
-    var status : Status = status
-        private set
+    val cost : BigDecimal
+        get() = calculateCost()
+    val status : Status = _status
 
-    private fun calculateCost() {
-        cost = BigDecimal(Random().nextInt(20))
-    }
+    private fun calculateCost() = BigDecimal(Random().nextInt(20))
 
     fun create() {
-        calculateCost()
         return OrderCreatedEvent(this).sendEvent()
     }
 
@@ -31,8 +27,8 @@ class Order(val id: String,
     }
 
     fun pay() {
-        if(status == Status.OPEN) {
-            status = Status.PAID
+        if(_status == Status.OPEN) {
+            _status = Status.PAID
             return OrderPaidEvent(id).sendEvent()
         } else {
             throw IllegalStateException("Order should be open in order to be paid")
@@ -40,7 +36,7 @@ class Order(val id: String,
     }
 
     fun deliver() {
-        if(status == Status.PAID) {
+        if(_status == Status.PAID) {
             return OrderDeliveredEvent(id).sendEvent()
         } else {
             throw IllegalStateException("Order has not been paid yet")
