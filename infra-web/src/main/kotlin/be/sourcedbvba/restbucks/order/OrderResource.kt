@@ -62,6 +62,12 @@ class GetOrdersJsonReceiver : GetOrdersReceiver {
     override fun receive(response: Flux<GetOrdersResponse>) {
         result = ResponseEntity.ok(response.map { it.toResponseBody() })
     }
+
+    internal data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
+
+    internal fun GetOrdersResponse.toResponseBody() : GetOrdersResponseBody {
+        return GetOrdersResponseBody(id, customer, status.name.toLowerCase())
+    }
 }
 
 class CreateOrderJsonReceiver : CreateOrderReceiver {
@@ -70,6 +76,14 @@ class CreateOrderJsonReceiver : CreateOrderReceiver {
 
     override fun receive(response: Mono<CreateOrderResponse>) {
         result = ResponseEntity.ok(response.map { it.toResponseBody() })
+    }
+
+    internal data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
+    data class HalLink(val href: String)
+
+    internal fun CreateOrderResponse.toResponseBody(): CreateOrderResponseBody {
+        val links = mapOf(Pair("status", HalLink("/${id}/status")))
+        return CreateOrderResponseBody(id, customer, amount, links)
     }
 }
 
@@ -82,18 +96,9 @@ class GetOrderStatusJsonReceiver: GetOrderStatusReceiver {
     }
 }
 
-data class HalLink(val href: String)
 
-data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
-fun CreateOrderResponse.toResponseBody(): CreateOrderResponseBody {
-    val links = mapOf(Pair("status", HalLink("/${id}/status")))
-    return CreateOrderResponseBody(id, customer, amount, links)
-}
 
-data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
-fun GetOrdersResponse.toResponseBody() : GetOrdersResponseBody {
-    return GetOrdersResponseBody(id, customer, status.name.toLowerCase())
-}
+
 
 
 
