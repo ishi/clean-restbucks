@@ -5,8 +5,8 @@ import be.sourcedbvba.restbucks.usecase.UseCase
 
 @UseCase
 internal class GetOrderStatusImpl(val orderGateway: OrderGateway) : GetOrderStatus {
-    override fun <T> getStatus(request: GetOrderStatusRequest, presenter: (GetOrderStatusResponse) -> T): T {
+    override fun getStatus(request: GetOrderStatusRequest, presenter: GetOrderStatusReceiver) {
         val order = orderGateway.getOrder(request.orderId)
-        return presenter(GetOrderStatusResponse(order.getStatus()))
+        presenter.receive(GetOrderStatusResponse(order.status))
     }
 }

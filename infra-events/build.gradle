@@ -12,5 +12,5 @@ plugins {
 
 dependencies {
     compile project(":domain")
-    compile "org.springframework:spring-context:5.0.4.RELEASE"
+    compile "org.springframework:spring-context:5.0.7.RELEASE"
 }

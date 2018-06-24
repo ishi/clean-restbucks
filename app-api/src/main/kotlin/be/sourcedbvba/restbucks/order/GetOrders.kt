@@ -5,8 +5,10 @@ import be.sourcedbvba.restbucks.Size
 import be.sourcedbvba.restbucks.Status
 
 interface GetOrders {
-    fun <T> getOrders(presenter: (List<GetOrdersResponse>) -> T) : T
+    fun getOrders(presenter: GetOrdersReceiver)
 }
+
+typealias GetOrdersResponses = List<GetOrdersResponse>
 
 data class GetOrdersResponse(val id: String,
                              val customer: String,
@@ -16,3 +18,7 @@ data class GetOrdersResponseItem(val product: String,
                                  val quantity: Int,
                                  val size: Size,
                                  val milk: Milk)
+
+interface GetOrdersReceiver {
+    fun receive(response: GetOrdersResponses)
+}

@@ -6,10 +6,10 @@ import java.util.*
 
 @UseCase
 internal class CreateOrderImpl : CreateOrder {
-    override fun <T> create(request: CreateOrderRequest, presenter: (CreateOrderResponse) -> T): T {
+    override fun create(request: CreateOrderRequest, presenter: CreateOrderReceiver) {
         val order = request.toOrder()
         order.create()
-        return presenter(order.toResponse())
+        presenter.receive(order.toResponse())
     }
 
     private fun CreateOrderRequest.toOrder() : Order {

@@ -12,6 +12,6 @@ plugins {
 }
 dependencies {
     compile project(":domain")
-    compile "org.springframework.data:spring-data-jpa:2.0.5.RELEASE"
+    compile "org.springframework.data:spring-data-jpa:2.0.8.RELEASE"
     compile "org.hibernate:hibernate-core:5.2.14.Final"
 }

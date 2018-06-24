@@ -12,6 +12,6 @@ plugins {
 
 dependencies {
     compile project(":app-api")
-    compile "org.springframework:spring-webmvc:5.0.4.RELEASE"
+    compile "org.springframework:spring-webmvc:5.0.7.RELEASE"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.4"
 }

@@ -3,3 +3,8 @@ build
 .idea
 out
 .gradle
+bin
+.classpath
+.project
+build.log
+.settings
