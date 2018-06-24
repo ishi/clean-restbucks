@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 internal class OrderDeliveredConsumer internal constructor(private val orderJpaRepository: OrderJpaRepository) : DomainEventConsumer<OrderDelivered> {
     override fun consume(event: OrderDelivered) {
-        val order = orderJpaRepository.getOne(event.getId())
+        val order = orderJpaRepository.getOne(event.getId().value)
         order.status = Status.DELIVERED
         orderJpaRepository.save(order)
     }

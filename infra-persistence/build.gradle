@@ -7,11 +7,11 @@
  */
 
 plugins {
-    id "org.jetbrains.kotlin.plugin.spring" version "1.2.21"
-    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.21"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.2.41"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.41"
 }
 dependencies {
     compile project(":domain")
-    compile "org.springframework.data:spring-data-jpa:2.0.8.RELEASE"
-    compile "org.hibernate:hibernate-core:5.2.14.Final"
+    compile "org.springframework.data:spring-data-jpa"
+    compile "org.hibernate:hibernate-core"
 }

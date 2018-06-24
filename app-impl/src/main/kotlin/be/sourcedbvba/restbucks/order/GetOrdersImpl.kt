@@ -2,7 +2,6 @@ package be.sourcedbvba.restbucks.order
 
 import be.sourcedbvba.restbucks.order.gateway.OrderGateway
 import be.sourcedbvba.restbucks.usecase.UseCase
-import com.sun.awt.SecurityWarning.getSize
 
 @UseCase
 internal class GetOrdersImpl(val orderGateway: OrderGateway) : GetOrders {
@@ -13,10 +12,10 @@ internal class GetOrdersImpl(val orderGateway: OrderGateway) : GetOrders {
 
 
     private fun Order.toResponse() : GetOrdersResponse {
-        return GetOrdersResponse(id, customer, status, items.map { it.toResponse() })
+        return GetOrdersResponse(id.value, customer, status, items.map { it.toResponse() })
     }
 
     private fun OrderItem.toResponse() : GetOrdersResponseItem {
-        return GetOrdersResponseItem(product, quantity, size, milk)
+        return GetOrdersResponseItem(productName, quantity, size, milk)
     }
 }

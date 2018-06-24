@@ -1,10 +1,10 @@
 plugins {
-    id "org.jetbrains.kotlin.plugin.spring" version "1.2.21"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.2.41"
 }
 
 dependencies {
     compile project(":app-api")
-    compile "org.springframework:spring-tx:5.0.7.RELEASE"
-    compile "org.springframework.boot:spring-boot-starter-aop:2.0.3.RELEASE"
+    compile "org.springframework:spring-tx"
+    compile "org.springframework.boot:spring-boot-starter-aop"
 
 }

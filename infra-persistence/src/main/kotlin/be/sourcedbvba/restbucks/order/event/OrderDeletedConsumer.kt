@@ -7,6 +7,6 @@ import org.springframework.stereotype.Component
 @Component
 internal class OrderDeletedConsumer internal constructor(private val orderJpaRepository: OrderJpaRepository) : DomainEventConsumer<OrderDeleted> {
     override fun consume(event: OrderDeleted) {
-        orderJpaRepository.deleteById(event.getId())
+        orderJpaRepository.deleteById(event.getId().value)
     }
 }

@@ -7,8 +7,9 @@ import be.sourcedbvba.restbucks.order.event.*
 import java.math.BigDecimal
 import java.util.*
 
+data class OrderId(val value: String)
 
-class Order(val id: String,
+class Order(val id: OrderId,
                      val customer: String,
                      status: Status,
                      val items: List<OrderItem>) {
@@ -48,4 +49,4 @@ class Order(val id: String,
     }
 }
 
-class OrderItem(val product: String, val quantity: Int, val size: Size, val milk: Milk)
+class OrderItem(val productName: String, val quantity: Int, val size: Size, val milk: Milk)

@@ -1,9 +1,11 @@
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.2.21"
+    id "org.jetbrains.kotlin.jvm" version "1.2.41"
+    id "io.spring.dependency-management" version "1.0.5.RELEASE"
 }
 
 subprojects {
     apply plugin: "org.jetbrains.kotlin.jvm"
+    apply plugin: "io.spring.dependency-management"
 
     repositories {
         jcenter()
@@ -12,7 +14,11 @@ subprojects {
         }
     }
 
-
+    dependencyManagement {
+        imports {
+            mavenBom 'io.spring.platform:platform-bom:Cairo-SR2'
+        }
+    }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         kotlinOptions {
@@ -23,5 +29,11 @@ subprojects {
     dependencies {
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
         compile "org.jetbrains.kotlin:kotlin-reflect"
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            failOnVersionConflict()
+        }
     }
 }

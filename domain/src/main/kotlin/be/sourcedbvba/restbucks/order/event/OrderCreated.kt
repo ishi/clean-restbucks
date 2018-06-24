@@ -5,6 +5,7 @@ import be.sourcedbvba.restbucks.Size
 import be.sourcedbvba.restbucks.Status
 import be.sourcedbvba.restbucks.domain.event.DomainEvent
 import be.sourcedbvba.restbucks.order.Order
+import be.sourcedbvba.restbucks.order.OrderId
 import java.math.BigDecimal
 
 interface OrderCreated : DomainEvent {
@@ -14,19 +15,19 @@ interface OrderCreated : DomainEvent {
 internal data class OrderCreatedEvent(private val order: Order) : OrderCreated {
     override fun getOrder(): OrderState {
         return OrderState(order.id, order.customer, order.status, order.cost, order.items.map {
-            OrderItemState(it.product, it.quantity, it.size, it.milk)
+            OrderItemState(it.productName, it.quantity, it.size, it.milk)
         })
 
     }
 }
 
-data class OrderState(val id: String,
+data class OrderState(val id: OrderId,
                       val customer: String,
                       val status: Status,
                       val cost: BigDecimal,
                       val items: List<OrderItemState>)
 
-data class OrderItemState(val product: String,
+data class OrderItemState(val productName: String,
                           val quantity: Int,
                           val size: Size,
                           val milk: Milk)
