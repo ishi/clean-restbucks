@@ -8,11 +8,16 @@ import java.math.BigDecimal
 import java.util.*
 
 data class OrderId(val value: String)
+typealias CustomerName = String
+
+data class OrderItems(private val value: List<OrderItem>) {
+    fun <T> map(mapper: ((OrderItem) -> T)) = value.map(mapper)
+}
 
 class Order(val id: OrderId,
-                     val customer: String,
+                     val customer: CustomerName,
                      status: Status,
-                     val items: List<OrderItem>) {
+                     val items: OrderItems) {
     lateinit var cost : BigDecimal
         private set
     var status : Status = status
@@ -49,4 +54,6 @@ class Order(val id: OrderId,
     }
 }
 
-class OrderItem(val productName: String, val quantity: Int, val size: Size, val milk: Milk)
+typealias ProductName = String
+typealias Quantity = Int
+class OrderItem(val productName: ProductName, val quantity: Quantity, val size: Size, val milk: Milk)

@@ -12,10 +12,14 @@ internal class GetOrdersImpl(val orderGateway: OrderGateway) : GetOrders {
 
 
     private fun Order.toResponse() : GetOrdersResponse {
-        return GetOrdersResponse(id.value, customer, status, items.map { it.toResponse() })
+        return GetOrdersResponse(id.value, customer, status, items.toResponses())
     }
 
-    private fun OrderItem.toResponse() : GetOrdersResponseItem {
-        return GetOrdersResponseItem(productName, quantity, size, milk)
+    private fun OrderItems.toResponses() : List<GetOrdersResponseItem> {
+        return map { item ->
+            item.toResponse()
+        }
     }
+
+    private fun OrderItem.toResponse() = GetOrdersResponseItem(productName, quantity, size, milk)
 }

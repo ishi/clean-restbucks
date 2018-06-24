@@ -14,7 +14,7 @@ internal class CreateOrderImpl : CreateOrder {
 
     private fun CreateOrderRequest.toOrder() : Order {
         val id = UUID.randomUUID().toString()
-        return Order(OrderId(id), customer, Status.OPEN, items.map { it.toOrderItem() })
+        return Order(OrderId(id), customer, Status.OPEN, OrderItems(items.map { it.toOrderItem() }))
     }
 
     private fun CreateOrderRequestItem.toOrderItem(): OrderItem {
