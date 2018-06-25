@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks.usecase.transaction
+package be.sourcedbvba.restbucks.domain.transaction
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -6,12 +6,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.transaction.annotation.EnableTransactionManagement
 
 @Configuration
-@EnableAspectJAutoProxy
 @EnableTransactionManagement
 class UseCaseTransactionConfiguration {
     @Bean
-    fun useCaseTransactionAspect(transactionTemplate: TransactionalUseCaseExecutor) = TransactionalUseCaseAspect(transactionTemplate)
+    fun transactionalUseCaseExecutor() = TransactionalExecutor()
 
-    @Bean
-    fun transactionalUseCaseExecutor() = TransactionalUseCaseExecutor()
+    fun transactionalRunner(executor: TransactionalExecutor) = SpringTransactionalRunner(executor)
 }
