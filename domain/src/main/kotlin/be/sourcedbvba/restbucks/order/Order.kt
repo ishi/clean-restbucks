@@ -3,6 +3,8 @@ package be.sourcedbvba.restbucks.order
 import be.sourcedbvba.restbucks.Milk
 import be.sourcedbvba.restbucks.Size
 import be.sourcedbvba.restbucks.Status
+import be.sourcedbvba.restbucks.domain.notification.Notification
+import be.sourcedbvba.restbucks.domain.notification.Notifications
 import be.sourcedbvba.restbucks.order.event.*
 import java.math.BigDecimal
 import java.util.*
@@ -36,20 +38,22 @@ class Order(val id: OrderId,
         return OrderDeletedEvent(id).sendEvent()
     }
 
+    @Throws(ExpectedOrderStatusException::class)
     fun pay() {
         if(status == Status.OPEN) {
             status = Status.PAID
-            return OrderPaidEvent(id).sendEvent()
+            OrderPaidEvent(id).sendEvent()
         } else {
-            throw IllegalStateException("Order should be open in order to be paid")
+            throw ExpectedOrderStatusException(listOf(Status.OPEN))
         }
     }
 
+    @Throws(ExpectedOrderStatusException::class)
     fun deliver() {
         if(status == Status.PAID) {
-            return OrderDeliveredEvent(id).sendEvent()
+            OrderDeliveredEvent(id).sendEvent()
         } else {
-            throw IllegalStateException("Order has not been paid yet")
+            throw ExpectedOrderStatusException(listOf(Status.PAID))
         }
     }
 }

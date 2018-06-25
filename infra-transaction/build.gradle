@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    compile project(":app-api")
+    compile project(":domain")
     compile "org.springframework:spring-tx"
-    compile "org.springframework.boot:spring-boot-starter-aop"
+    compile "org.springframework:spring-context"
 
 }
