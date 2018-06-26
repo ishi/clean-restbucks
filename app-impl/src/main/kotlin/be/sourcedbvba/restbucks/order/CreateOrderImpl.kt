@@ -1,20 +1,24 @@
 package be.sourcedbvba.restbucks.order
 
 import be.sourcedbvba.restbucks.Status
-import be.sourcedbvba.restbucks.domain.transaction.TransactionalRunner
+import be.sourcedbvba.restbucks.domain.transaction.TransactionFactory
 import be.sourcedbvba.restbucks.usecase.UseCase
 import java.util.*
 import java.util.function.Supplier
 
 @UseCase
-internal class CreateOrderImpl(private val transactionalRunner: TransactionalRunner) : CreateOrder {
+internal class CreateOrderImpl(private val transactionFactory: TransactionFactory) : CreateOrder {
     override fun create(request: CreateOrderRequest, presenter: CreateOrderReceiver) {
         request.validate()
-        transactionalRunner.runInTransaction(Supplier {
+        val transaction = transactionFactory.start()
+        try {
             val order = request.toOrder()
             order.create()
             presenter.receive(order.toResponse())
-        })
+            transaction.commit()
+        } catch(ex: Exception) {
+            transaction.rollback()
+        }
     }
 
     private fun CreateOrderRequest.validate() {
