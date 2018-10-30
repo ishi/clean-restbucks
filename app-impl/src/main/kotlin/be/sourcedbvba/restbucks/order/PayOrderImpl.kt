@@ -9,7 +9,6 @@ import java.util.function.Supplier
 internal class PayOrderImpl(private val orderGateway: OrderGateway,
                             private val transactionFactory: TransactionFactory) : PayOrder {
     override fun pay(request: PayOrderRequest) {
-        request.validate()
         val transaction = transactionFactory.start()
         try {
             val order = orderGateway.getOrder(OrderId(request.orderId))
@@ -18,9 +17,5 @@ internal class PayOrderImpl(private val orderGateway: OrderGateway,
         } catch (ex: Exception) {
             transaction.rollback()
         }
-    }
-
-    private fun PayOrderRequest.validate() {
-
     }
 }

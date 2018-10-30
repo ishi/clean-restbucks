@@ -9,7 +9,6 @@ import java.util.function.Supplier
 @UseCase
 internal class DeliverOrderImpl(val orderGateway: OrderGateway, private val transactionFactory: TransactionFactory) : DeliverOrder {
     override fun deliver(request: DeliverOrderRequest) {
-        request.validate()
         val transaction = transactionFactory.start()
         try {
             val order = orderGateway.getOrder(OrderId(request.orderId))
@@ -18,9 +17,5 @@ internal class DeliverOrderImpl(val orderGateway: OrderGateway, private val tran
         } catch (ex: Exception) {
             transaction.rollback()
         }
-    }
-
-    private fun DeliverOrderRequest.validate() {
-
     }
 }

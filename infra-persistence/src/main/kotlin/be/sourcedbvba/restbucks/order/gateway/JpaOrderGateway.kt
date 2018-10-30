@@ -14,10 +14,10 @@ internal class JpaOrderGateway internal constructor(private val orderJpaReposito
     }
 
     internal fun OrderEntity.toDomain() : Order {
-        return Order(OrderId(id), customerName, status, OrderItems(items.map { it.toDomain() }))
+        return OrderImpl(OrderId(id), customerName, status, OrderItems(items.map { it.toDomain() }))
     }
 
     internal fun OrderItemEntity.toDomain() : OrderItem {
-        return OrderItem(product, quantity, size, milk)
+        return OrderItemImpl(product, quantity, size, milk)
     }
 }

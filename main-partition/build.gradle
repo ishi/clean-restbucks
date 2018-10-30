@@ -15,7 +15,6 @@ dependencies {
     compile project(":infra-web")
     compile project(":infra-persistence")
     compile project(":infra-events")
-    compile project(":infra-transaction")
 
     compile("org.springframework.boot:spring-boot-starter-web")
     compile "org.springframework.boot:spring-boot-starter-data-jpa"

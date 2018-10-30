@@ -10,7 +10,6 @@ import java.util.function.Supplier
 internal class DeleteOrderImpl(private val orderGateway: OrderGateway,
                                private val transactionFactory: TransactionFactory) : DeleteOrder {
     override fun delete(request: DeleteOrderRequest) {
-        request.validate()
         val transaction = transactionFactory.start()
         try {
             val order = orderGateway.getOrder(OrderId(request.orderId))
@@ -19,9 +18,5 @@ internal class DeleteOrderImpl(private val orderGateway: OrderGateway,
         } catch (ex: Exception) {
             transaction.rollback()
         }
-    }
-
-    private fun DeleteOrderRequest.validate() {
-
     }
 }

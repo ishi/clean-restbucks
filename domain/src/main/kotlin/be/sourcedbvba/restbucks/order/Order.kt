@@ -16,30 +16,51 @@ data class OrderItems(private val value: List<OrderItem>) {
     fun <T> map(mapper: ((OrderItem) -> T)) = value.map(mapper)
 }
 
-class Order(val id: OrderId,
-                     val customer: CustomerName,
+interface Order {
+    companion object {}
+    val id: OrderId
+    val customer: CustomerName
+    val items: OrderItems
+    val cost: BigDecimal
+    val status: Status
+
+    fun create()
+    fun delete()
+    fun pay()
+    fun deliver()
+}
+
+class OrderImpl(override val id: OrderId,
+                     override val customer: CustomerName,
                      status: Status,
-                     val items: OrderItems) {
-    lateinit var cost : BigDecimal
+                     override val items: OrderItems) : Order {
+    override lateinit var cost : BigDecimal
         private set
-    var status : Status = status
+    override var status : Status = status
         private set
+
+    fun Order.Companion.createDefaultImplementation(id: OrderId,
+                                                        customer: CustomerName,
+                                                        status: Status,
+                                                        items: OrderItems) : Order {
+        return OrderImpl(id, customer, status, items)
+    }
 
     private fun calculateCost() {
         cost = BigDecimal(Random().nextInt(20))
     }
 
-    fun create() {
+    override fun create() {
         calculateCost()
         return OrderCreatedEvent(this).sendEvent()
     }
 
-    fun delete() {
+    override fun delete() {
         return OrderDeletedEvent(id).sendEvent()
     }
 
     @Throws(ExpectedOrderStatusException::class)
-    fun pay() {
+    override fun pay() {
         if(status == Status.OPEN) {
             status = Status.PAID
             OrderPaidEvent(id).sendEvent()
@@ -49,7 +70,7 @@ class Order(val id: OrderId,
     }
 
     @Throws(ExpectedOrderStatusException::class)
-    fun deliver() {
+    override fun deliver() {
         if(status == Status.PAID) {
             OrderDeliveredEvent(id).sendEvent()
         } else {
@@ -58,6 +79,27 @@ class Order(val id: OrderId,
     }
 }
 
+interface OrderItem {
+    companion object {}
+    val productName: ProductName
+    val quantity: Quantity
+    val size: Size
+    val milk: Milk
+}
+
 typealias ProductName = String
 typealias Quantity = Int
-class OrderItem(val productName: ProductName, val quantity: Quantity, val size: Size, val milk: Milk)
+
+class OrderItemImpl(
+        override val productName: ProductName,
+        override val quantity: Quantity,
+        override val size: Size,
+        override val milk: Milk) : OrderItem {
+    fun OrderItem.Companion.createDefaultImplementation(productName: ProductName,
+                                                        quantity: Quantity,
+                                                        size: Size,
+                                                        milk: Milk) : OrderItem {
+        return OrderItemImpl(productName, quantity, size, milk)
+    }
+}
+
