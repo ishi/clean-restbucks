@@ -23,6 +23,11 @@ internal class OrderResource(val createOrder: CreateOrder,
         return receiver.result
     }
 
+    @RequestMapping(method = [RequestMethod.HEAD])
+    fun headOrders() : ResponseEntity<*> {
+        return ResponseEntity.ok("OK");
+    }
+
     @GetMapping
     fun getOrders() : ResponseEntity<*> {
         val receiver = GetOrdersJsonReceiver()

@@ -3,8 +3,16 @@ plugins {
     id "io.spring.dependency-management" version "1.0.5.RELEASE"
 }
 
-subprojects {
+allprojects {
     apply plugin: "org.jetbrains.kotlin.jvm"
+
+    repositories {
+        jcenter()
+    }
+
+}
+
+subprojects {
     apply plugin: "io.spring.dependency-management"
 
     repositories {
@@ -37,3 +45,16 @@ subprojects {
         }
     }
 }
+
+task copyAppDependencies(type: Copy, dependsOn: subprojects.jar) {
+    from(subprojects.jar)
+    into 'build/dependencies/app'
+}
+
+task copyThirdPartyDependencies(type: Copy) {
+    from(subprojects.configurations.runtime)
+    into 'build/dependencies/third-party'
+}
+
+build.dependsOn copyAppDependencies
+build.dependsOn copyThirdPartyDependencies

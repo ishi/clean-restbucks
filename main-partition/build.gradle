@@ -4,7 +4,6 @@
  * Linking everything together into an executable application
  */
 plugins {
-    id "org.springframework.boot" version "2.0.3.RELEASE"
     id "org.jetbrains.kotlin.plugin.spring" version "1.2.41"
 }
 
@@ -22,3 +21,4 @@ dependencies {
 
     runtime "com.h2database:h2:1.4.196"
 }
+
