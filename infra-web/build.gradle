@@ -12,6 +12,7 @@ plugins {
 
 dependencies {
     compile project(":app-api")
-    compile "org.springframework:spring-webmvc"
+    compile "org.springframework:spring-webflux"
+    compile "org.springframework:spring-context"
     compile "com.fasterxml.jackson.module:jackson-module-kotlin"
 }

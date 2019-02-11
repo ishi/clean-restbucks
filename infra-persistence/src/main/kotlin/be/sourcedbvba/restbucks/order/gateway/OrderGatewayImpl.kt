@@ -4,13 +4,13 @@ import be.sourcedbvba.restbucks.order.*
 import org.springframework.stereotype.Component
 
 @Component
-internal class JpaOrderGateway internal constructor(private val orderJpaRepository: OrderJpaRepository) : OrderGateway {
+internal class OrderGatewayImpl internal constructor(private val orderRepository: OrderRepository) : OrderGateway {
     override fun getOrder(orderId: OrderId): Order {
-        return orderJpaRepository.getOne(orderId.value).toDomain()
+        return orderRepository.getOne(orderId.value).toDomain()
     }
 
     override fun getOrders(): List<Order> {
-        return orderJpaRepository.findAll().map { it.toDomain() }
+        return orderRepository.findAll().map { it.toDomain() }
     }
 
     internal fun OrderEntity.toDomain() : Order {

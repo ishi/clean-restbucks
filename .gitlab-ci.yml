@@ -1,11 +1,26 @@
 image: java:8
 
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - build
+
 stages:
   - build
 
 build:
   stage: build
-  script: ./gradlew package
-  artifacts:
-    paths:
-      - main-partition/build/libs/*.jar
+  script: ./gradlew build
+
+dockerbuild:
+  image: docker:stable
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t CI_REGISTRY_IMAGE .
+    - docker push CI_REGISTRY_IMAGE
