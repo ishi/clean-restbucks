@@ -8,11 +8,11 @@ cache:
 stages:
   - build
 
-build:
+build:gradle:
   stage: build
   script: ./gradlew build
 
-dockerbuild:
+build:docker:
   image: docker:stable
   services:
     - docker:dind
@@ -25,4 +25,4 @@ dockerbuild:
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE
   dependencies:
-    - build
+    - build:gradle
