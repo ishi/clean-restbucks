@@ -51,8 +51,9 @@ task copyAppDependencies(type: Copy, dependsOn: subprojects.jar) {
     into 'build/dependencies/app'
 }
 
-task copyThirdPartyDependencies(type: Copy) {
-    from(subprojects.configurations.runtime)
+task copyThirdPartyDependencies(type: Copy, dependsOn: subprojects.jar) {
+    from(subprojects.configurations.runtimeClasspath)
+    exclude(subprojects.jar*.archiveName)
     into 'build/dependencies/third-party'
 }
 
