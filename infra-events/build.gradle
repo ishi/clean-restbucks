@@ -11,6 +11,6 @@ plugins {
 }
 
 dependencies {
-    compile project(":domain")
-    compile "org.springframework:spring-context"
+    implementation project(":domain")
+    implementation "org.springframework:spring-context"
 }

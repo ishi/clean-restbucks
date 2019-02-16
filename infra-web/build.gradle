@@ -11,8 +11,8 @@ plugins {
 }
 
 dependencies {
-    compile project(":app-api")
-    compile "org.springframework:spring-webflux"
-    compile "org.springframework:spring-context"
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin"
-}
+    implementation project(":app-api")
+    implementation project(":shared-vocabulary")
+    implementation "org.springframework:spring-webflux"
+    implementation "org.springframework:spring-context"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"}

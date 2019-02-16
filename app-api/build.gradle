@@ -6,5 +6,5 @@
  */
 
 dependencies {
-    compile project(":shared-vocabulary")
+    implementation project(":shared-vocabulary")
 }

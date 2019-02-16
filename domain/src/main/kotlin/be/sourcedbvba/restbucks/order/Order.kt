@@ -17,7 +17,6 @@ data class OrderItems(private val value: List<OrderItem>) {
 }
 
 interface Order {
-    companion object {}
     val id: OrderId
     val customer: CustomerName
     val items: OrderItems
@@ -38,13 +37,6 @@ class OrderImpl(override val id: OrderId,
         private set
     override var status : Status = status
         private set
-
-    fun Order.Companion.createDefaultImplementation(id: OrderId,
-                                                        customer: CustomerName,
-                                                        status: Status,
-                                                        items: OrderItems) : Order {
-        return OrderImpl(id, customer, status, items)
-    }
 
     private fun calculateCost() {
         cost = BigDecimal(Random().nextInt(20))
@@ -95,11 +87,5 @@ class OrderItemImpl(
         override val quantity: Quantity,
         override val size: Size,
         override val milk: Milk) : OrderItem {
-    fun OrderItem.Companion.createDefaultImplementation(productName: ProductName,
-                                                        quantity: Quantity,
-                                                        size: Size,
-                                                        milk: Milk) : OrderItem {
-        return OrderItemImpl(productName, quantity, size, milk)
-    }
 }
 

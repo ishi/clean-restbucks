@@ -1,6 +1,5 @@
 package be.sourcedbvba.restbucks.order
 
-import be.sourcedbvba.restbucks.order.OrderImpl.
 import be.sourcedbvba.restbucks.Status
 import be.sourcedbvba.restbucks.domain.transaction.TransactionFactory
 import be.sourcedbvba.restbucks.usecase.UseCase
@@ -22,7 +21,7 @@ internal class CreateOrderImpl(private val transactionFactory: TransactionFactor
 
     private fun CreateOrderRequest.toOrder() : Order {
         val id = UUID.randomUUID().toString()
-        return Order.createDefaultImplementation(OrderId(id), customer, Status.OPEN, OrderItems(items.map { it.toOrderItem() }))
+        return OrderImpl(OrderId(id), customer, Status.OPEN, OrderItems(items.map { it.toOrderItem() }))
     }
 
     private fun CreateOrderRequestItem.toOrderItem(): OrderItem {
