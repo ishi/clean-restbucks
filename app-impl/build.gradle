@@ -10,8 +10,9 @@ plugins {
 }
 
 dependencies {
-    compile project(":app-api")
-    compile project(":domain")
+    implementation project(":app-api")
+    implementation project(":domain")
+    implementation project(":shared-vocabulary")
 }
 
 allOpen {

@@ -8,16 +8,15 @@ plugins {
 }
 
 dependencies {
-    compile project(":domain")
-    compile project(":app-api")
-    compile project(":app-impl")
-    compile project(":infra-web")
-    compile project(":infra-persistence")
-    compile project(":infra-events")
-    compile project(":infra-transaction")
+    implementation project(":domain")
+    implementation project(":app-api")
+    implementation project(":app-impl")
+    implementation project(":infra-web")
+    implementation project(":infra-persistence")
+    implementation project(":infra-events")
 
-    compile("org.springframework.boot:spring-boot-starter-webflux")
-    compile "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
     runtime "com.h2database:h2:1.4.196"
 }
