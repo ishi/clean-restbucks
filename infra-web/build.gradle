@@ -14,5 +14,4 @@ dependencies {
     implementation project(":app-api")
     implementation project(":shared-vocabulary")
     implementation "org.springframework:spring-webflux"
-    implementation "org.springframework:spring-context"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin"}
+    runtime "com.fasterxml.jackson.module:jackson-module-kotlin"}

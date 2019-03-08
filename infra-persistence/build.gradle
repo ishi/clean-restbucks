@@ -14,5 +14,5 @@ dependencies {
     implementation project(":domain")
     implementation project(":shared-vocabulary")
     implementation "org.springframework.data:spring-data-jpa"
-    implementation "org.hibernate:hibernate-core"
+    implementation "javax.persistence:javax.persistence-api"
 }

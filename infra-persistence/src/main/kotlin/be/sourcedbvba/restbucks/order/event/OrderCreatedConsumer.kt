@@ -5,6 +5,7 @@ import be.sourcedbvba.restbucks.domain.event.DomainEventConsumer
 import be.sourcedbvba.restbucks.order.gateway.jpa.OrderEntity
 import be.sourcedbvba.restbucks.order.gateway.jpa.OrderItemEntity
 import be.sourcedbvba.restbucks.order.gateway.jpa.OrderRepository
+import java.util.UUID
 
 class OrderCreatedConsumer constructor(private val orderRepository: OrderRepository) : DomainEventConsumer {
     override fun canHandle(event: DomainEvent) = event is OrderCreated
@@ -14,11 +15,11 @@ class OrderCreatedConsumer constructor(private val orderRepository: OrderReposit
         orderRepository.save(orderEntity)
     }
 
-    internal fun OrderState.toJpa(): OrderEntity {
+    private fun OrderState.toJpa(): OrderEntity {
         return OrderEntity(id.value, customer, status, cost, items.map { it.toJpa() })
     }
 
-    internal fun OrderItemState.toJpa(): OrderItemEntity {
-        return OrderItemEntity(null, productName, quantity, size, milk)
+    private fun OrderItemState.toJpa(): OrderItemEntity {
+        return OrderItemEntity(UUID.randomUUID().toString(), productName, quantity, size, milk)
     }
 }

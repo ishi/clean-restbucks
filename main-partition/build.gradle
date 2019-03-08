@@ -15,9 +15,9 @@ dependencies {
     implementation project(":infra-persistence")
     implementation project(":shared-vocabulary")
 
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation "org.springframework.boot:spring-boot-starter-webflux"
     implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-
+    
     runtime "com.h2database:h2:1.4.196"
 }
 
