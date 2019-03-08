@@ -4,3 +4,7 @@ spring:
     hibernate:
       ddl-auto: create
     open-in-view: false
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: lazy
