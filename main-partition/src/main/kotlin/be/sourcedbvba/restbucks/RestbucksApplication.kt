@@ -1,6 +1,7 @@
 package be.sourcedbvba.restbucks
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+
 import org.springframework.boot.runApplication
 
 @SpringBootApplication

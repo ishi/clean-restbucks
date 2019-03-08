@@ -1,0 +1,15 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.2.41"
+    id "com.diffplug.gradle.spotless" version "3.18.0"
+}
+
+subprojects {
+    apply plugin: "com.diffplug.gradle.spotless"
+    apply plugin: "org.jetbrains.kotlin.jvm"
+
+    spotless {
+        kotlin {
+            ktlint()
+        }
+    }
+}

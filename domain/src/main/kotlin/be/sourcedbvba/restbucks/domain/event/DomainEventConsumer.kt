@@ -1,5 +1,6 @@
 package be.sourcedbvba.restbucks.domain.event
 
-interface DomainEventConsumer<E : DomainEvent> {
-    fun consume(event: E)
+interface DomainEventConsumer {
+    fun canHandle(event: DomainEvent): Boolean
+    fun consume(event: DomainEvent)
 }

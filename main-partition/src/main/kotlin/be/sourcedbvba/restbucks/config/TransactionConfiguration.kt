@@ -1,14 +1,16 @@
-package be.sourcedbvba.restbucks.domain.transaction
+package be.sourcedbvba.restbucks.config
 
+import be.sourcedbvba.restbucks.transaction.TransactionalUseCaseAspect
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
-import org.springframework.transaction.support.TransactionTemplate
 
 @Configuration
 @EnableTransactionManagement
+@EnableAspectJAutoProxy
 class TransactionConfiguration {
     @Bean
-    fun transactionFactory(transactionManager: PlatformTransactionManager) = SpringTransactionFactory(transactionManager)
+    fun useCaseTransactionAspect(transactionManager: PlatformTransactionManager) = TransactionalUseCaseAspect(transactionManager)
 }

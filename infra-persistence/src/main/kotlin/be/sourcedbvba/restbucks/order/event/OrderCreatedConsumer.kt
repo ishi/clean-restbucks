@@ -1,22 +1,24 @@
 package be.sourcedbvba.restbucks.order.event
 
+import be.sourcedbvba.restbucks.domain.event.DomainEvent
 import be.sourcedbvba.restbucks.domain.event.DomainEventConsumer
-import be.sourcedbvba.restbucks.order.*
-import be.sourcedbvba.restbucks.order.gateway.OrderRepository
-import org.springframework.stereotype.Component
+import be.sourcedbvba.restbucks.order.gateway.jpa.OrderEntity
+import be.sourcedbvba.restbucks.order.gateway.jpa.OrderItemEntity
+import be.sourcedbvba.restbucks.order.gateway.jpa.OrderRepository
 
-@Component
-internal class OrderCreatedConsumer internal constructor(private val orderRepository: OrderRepository) : DomainEventConsumer<OrderCreated> {
-    override fun consume(event: OrderCreated) {
-        val orderEntity = event.getOrder().toJpa()
+class OrderCreatedConsumer constructor(private val orderRepository: OrderRepository) : DomainEventConsumer {
+    override fun canHandle(event: DomainEvent) = event is OrderCreated
+
+    override fun consume(event: DomainEvent) {
+        val orderEntity = (event as OrderCreated).getOrder().toJpa()
         orderRepository.save(orderEntity)
     }
 
-    internal fun OrderState.toJpa() : OrderEntity {
+    internal fun OrderState.toJpa(): OrderEntity {
         return OrderEntity(id.value, customer, status, cost, items.map { it.toJpa() })
     }
 
-    internal fun OrderItemState.toJpa() : OrderItemEntity {
+    internal fun OrderItemState.toJpa(): OrderItemEntity {
         return OrderItemEntity(null, productName, quantity, size, milk)
     }
 }
