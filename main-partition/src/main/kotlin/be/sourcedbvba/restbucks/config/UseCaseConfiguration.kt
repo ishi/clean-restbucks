@@ -9,4 +9,4 @@ import org.springframework.context.annotation.FilterType
 @ComponentScan(basePackages = ["be.sourcedbvba.restbucks"],
         includeFilters = [ComponentScan.Filter(type = FilterType.ANNOTATION,
         value = [UseCase::class])])
-internal class RestbucksConfiguration
+internal class UseCaseConfiguration

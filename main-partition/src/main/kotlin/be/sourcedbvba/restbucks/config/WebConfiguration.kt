@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
-class OrderWebConfiguration : WebFluxConfigurer {
+class WebConfiguration : WebFluxConfigurer {
     @Bean
     fun orderRouter(createOrder: CreateOrder,
                     getOrders: GetOrders,
