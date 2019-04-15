@@ -29,6 +29,10 @@ class OrderRouterFactory(
     private fun headOrders(request: ServerRequest): Mono<ServerResponse> {
         return ServerResponse.ok().build()
     }
+        
+    private fun home(request: ServerRequest): Mono<ServerResponse> {
+        return ServerResponse.ok().build()
+    }
 
     private fun getOrders(request: ServerRequest): Mono<ServerResponse> {
         val receiver = GetOrdersJsonReceiver()
@@ -62,6 +66,7 @@ class OrderRouterFactory(
     }
 
     fun create() = router {
+        GET("/").invoke(this@OrderRouterFactory::home)
         GET("/order").invoke(this@OrderRouterFactory::getOrders)
         HEAD("/order").invoke(this@OrderRouterFactory::headOrders)
         POST("/order").and(contentType(MediaType.APPLICATION_JSON)).invoke(this@OrderRouterFactory::createOrder)
