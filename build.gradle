@@ -14,14 +14,7 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: "io.spring.dependency-management"
-    apply plugin: "com.diffplug.gradle.spotless"
-    
-    spotless {
-        kotlin {
-            ktlint()
-        }
-    }
+    apply plugin: "io.spring.dependency-management"    
 
     repositories {
         jcenter()

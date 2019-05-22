@@ -7,11 +7,11 @@ pluginManagement {
     }
 }
 
-include "app-api"
-include "app-impl"
+include "app:api"
+include "app:impl"
 include "domain"
-include "infra-web"
-include "infra-persistence"
+include "infra:web"
+include "infra:persistence"
 include "main-partition"
 include "shared-vocabulary"
 
