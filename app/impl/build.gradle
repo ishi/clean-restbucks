@@ -1,0 +1,20 @@
+/*
+ * Application implementation
+ * ==========================
+ * Should contain as little dependencies as possible.
+ * No technical frameworks allowed here!
+ */
+
+plugins {
+    id "org.jetbrains.kotlin.plugin.allopen" version "1.2.41"
+}
+
+dependencies {
+    implementation project(":app:api")
+    implementation project(":domain")
+    implementation project(":shared-vocabulary")
+}
+
+allOpen {
+    annotation("be.sourcedbvba.restbucks.usecase.UseCase")
+}

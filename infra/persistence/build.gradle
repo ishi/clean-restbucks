@@ -1,0 +1,18 @@
+/*
+ * Persistence infrastructure
+ * ==========================
+ * Technical framework dependencies allowed here (Spring)
+ * Dependencies should be about persistence (no exposing REST
+ * endpoints here), so think JPA, MongoDB or something like that
+ */
+
+plugins {
+    id "org.jetbrains.kotlin.plugin.spring" version "1.2.41"
+    id "org.jetbrains.kotlin.plugin.jpa" version "1.2.41"
+}
+dependencies {
+    implementation project(":domain")
+    implementation project(":shared-vocabulary")
+    implementation "org.springframework.data:spring-data-jpa"
+    implementation "javax.persistence:javax.persistence-api"
+}

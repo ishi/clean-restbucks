@@ -1,0 +1,1 @@
+:app;:domain;:infra;:main-partition;:shared-vocabulary;:app:api;:app:impl;:infra:persistence;:infra:web;
