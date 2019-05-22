@@ -17,23 +17,25 @@ class CleanArchitectureTests {
 
     @Test
     fun validateArchitecture() {
-        val structure = cleanArchitecture("be.sourcedbvba.restbucks.order") {
-            application {
-                boundary { "api" }
-                interactor { "impl" }
+        val structure = cleanArchitecture {
+            boundedContext("be.sourcedbvba.restbucks.order") {
+                application {
+                    boundary { "api" }
+                    interactor { "impl" }
+                }
+                domain {
+                    model { "domain.model" }
+                    services { "domain.services" }
+                }
+                infrastructure {
+                    consuming { "infra.web" }
+                    implementing { "infra.persistence" }
+                }
+                shared {
+                    vocabulary { "shared.vocabulary" }
+                }
+                mainPartition { "main" }
             }
-            domain {
-                model { "domain.model" }
-                services { "domain.services" }
-            }
-            infrastructure {
-                consuming { "infra.web" }
-                implementing { "infra.persistence" }
-            }
-            shared {
-                vocabulary { "shared.vocabulary" }
-            }
-            mainPartition { "main" }
         }
         structure.check(importedClasses)
     }
