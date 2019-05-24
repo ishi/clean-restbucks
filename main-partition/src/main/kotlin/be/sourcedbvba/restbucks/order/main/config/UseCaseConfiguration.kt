@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks.main.config
+package be.sourcedbvba.restbucks.order.main.config
 
 import be.sourcedbvba.restbucks.order.shared.vocabulary.UseCase
 import org.springframework.context.annotation.ComponentScan

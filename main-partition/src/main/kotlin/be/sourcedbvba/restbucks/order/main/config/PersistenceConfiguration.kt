@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks.main.config
+package be.sourcedbvba.restbucks.order.main.config
 
 import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderCreatedConsumer
 import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderDeletedConsumer
@@ -9,11 +9,9 @@ import be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa.OrderReposit
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactory
 import org.springframework.orm.jpa.JpaVendorAdapter
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import javax.persistence.EntityManagerFactory
 
 import javax.sql.DataSource
 

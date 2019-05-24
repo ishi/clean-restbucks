@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks
+package be.sourcedbvba.restbucks.order
 
 class CleanArchitectureBuilder {
    val definition: CleanArchitectureDefinition = CleanArchitectureDefinition()

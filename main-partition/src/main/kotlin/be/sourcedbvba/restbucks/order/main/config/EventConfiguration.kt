@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks.main.config
+package be.sourcedbvba.restbucks.order.main.config
 
 import be.sourcedbvba.restbucks.order.domain.services.event.DomainEvent
 import be.sourcedbvba.restbucks.order.domain.services.event.DomainEventConsumer

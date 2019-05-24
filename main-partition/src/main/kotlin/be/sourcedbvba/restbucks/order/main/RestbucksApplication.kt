@@ -1,4 +1,4 @@
-package be.sourcedbvba.restbucks.main
+package be.sourcedbvba.restbucks.order.main
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
