@@ -1,42 +1,54 @@
 package be.sourcedbvba.restbucks
 
-import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.importer.ClassFileImporter
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CleanArchitectureTests {
-    lateinit var importedClasses: JavaClasses
-
-    @BeforeAll
-    fun importClasses() {
-        importedClasses = ClassFileImporter().importPackages("be.sourcedbvba.restbucks.order")
-    }
+    private val classes = ClassFileImporter().importPackages("be.sourcedbvba.restbucks.order..")
 
     @Test
     fun validateArchitecture() {
-        val structure = cleanArchitecture {
+        cleanArchitecture {
             boundedContext("be.sourcedbvba.restbucks.order") {
+                whiteList = listOf("java.lang..", "java.util..", "java.math..", "kotlin..", "org.jetbrains.annotations..")
+
                 application {
-                    boundary { "api" }
-                    interactor { "impl" }
+                    boundary {
+                        subPackage = "api.."
+                    }
+                    interactor {
+                        subPackage = "impl.."
+                    }
                 }
                 domain {
-                    model { "domain.model" }
-                    services { "domain.services" }
+                    model {
+                        subPackage = "domain.model.."
+                    }
+                    services {
+                        subPackage = "domain.services.."
+                    }
                 }
                 infrastructure {
-                    consuming { "infra.web" }
-                    implementing { "infra.persistence" }
+                    consuming {
+                        subPackage = "infra.web.."
+                        whiteList = listOf("org.springframework.web..", "org.springframework.http..", "reactor.core..")
+                    }
+                    implementing {
+                        subPackage = "infra.persistence.."
+                        whiteList = listOf("org.springframework.transaction..", "org.aspectj..", "org.springframework.data..", "javax.persistence..")
+                    }
                 }
                 shared {
-                    vocabulary { "shared.vocabulary" }
+                    vocabulary {
+                        subPackage = "shared.vocabulary.."
+                    }
                 }
-                mainPartition { "main" }
+                mainPartition {
+                    subPackage = "main.."
+                }
             }
-        }
-        structure.check(importedClasses)
+        }.rule().check(classes)
     }
 }

@@ -1,112 +1,181 @@
 package be.sourcedbvba.restbucks
 
-import com.tngtech.archunit.core.domain.JavaClasses
+import com.tngtech.archunit.base.PackageMatchers
+import com.tngtech.archunit.core.domain.JavaClass
+import com.tngtech.archunit.lang.ArchCondition
 import com.tngtech.archunit.lang.ArchRule
+import com.tngtech.archunit.lang.CompositeArchRule
+import com.tngtech.archunit.lang.ConditionEvents
+import com.tngtech.archunit.lang.SimpleConditionEvent
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition
 
-fun CleanArchitectureDefinition.check(classes: JavaClasses) {
+fun CleanArchitectureDefinition.rule(): ArchRule {
+    var cleanArchRule = CompositeArchRule.of(ArchRuleDefinition.classes().should().resideInAnyPackage(*this.boundedContexts.map { "${it.boundedContextPackage}.." }.toTypedArray()))
     this.boundedContexts.forEach { bc ->
-        val rules: List<ArchRule> = listOf(
-                *applicationApiRules(bc),
-                *applicationImplRules(bc),
-                *domainRules(bc),
-                *consumingInfraRules(bc),
-                *implementingInfraRules(bc),
-                *sharedVocabularyRules(bc)
-        )
-        rules.forEach { it.check(classes) }
+        applicationApiRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
+        applicationImplRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
+        domainRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
+        consumingInfraRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
+        implementingInfraRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
+        sharedVocabularyRules(bc).forEach { cleanArchRule = cleanArchRule.and(it) }
     }
+    return cleanArchRule
 }
 
 
 fun applicationApiRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return definition.applicationBoundaryPackages.map {
-        ArchRuleDefinition.noClasses()
-                .that().resideInAPackage(it)
-                .should().accessClassesThat().resideInAnyPackage(
-                        *definition.applicationInteractorPackages,
-                        *definition.domainModelPackages,
-                        *definition.domainServicesPackages,
-                        *definition.implementingInfrastructurePackages,
-                        *definition.consumingInfrastructurePackages,
-                        *definition.mainPartitionPackages)
-    }.toTypedArray()
+    val list = mutableListOf<ArchRule>()
+    val allowedPackages = arrayOf(
+            *definition.whiteListPackages,
+            *definition.applicationBoundaryPackages,
+            *definition.applicationBoundaryWhitelist,
+            *definition.sharedVocabularyPackages,
+            *definition.sharedVocabularyWhitelist
+    )
+    definition.applicationBoundaryPackages.map {
+        getRestrictiveRules(it, *allowedPackages)
+    }.forEach {
+        list.addAll(it)
+    }
+    return list.toTypedArray()
 }
 
 
 fun applicationImplRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return definition.applicationInteractorPackages.map {
-        ArchRuleDefinition.noClasses()
-                .that().resideInAPackage(it)
-                .should().accessClassesThat().resideInAnyPackage(
-                        *definition.implementingInfrastructurePackages,
-                        *definition.consumingInfrastructurePackages,
-                        *definition.mainPartitionPackages)
-    }.toTypedArray()
+    val list = mutableListOf<ArchRule>()
+    val allowedPackages = arrayOf(
+            *definition.applicationBoundaryPackages,
+            *definition.applicationInteractorPackages,
+            *definition.domainModelPackages,
+            *definition.domainServicesPackages,
+            *definition.whiteListPackages,
+            *definition.applicationBoundaryWhitelist,
+            *definition.applicationInteractorWhitelist,
+            *definition.sharedVocabularyPackages,
+            *definition.sharedVocabularyWhitelist
+    )
+    definition.applicationInteractorPackages.map {
+        getRestrictiveRules(it, *allowedPackages)
+    }.forEach {
+        list.addAll(it)
+    }
+    return list.toTypedArray()
 }
 
 fun domainRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return arrayOf(
-            *definition.domainModelPackages.map {
-                ArchRuleDefinition.noClasses()
-                        .that().resideInAPackage(it)
-                        .should().accessClassesThat().resideInAnyPackage(
-                                *definition.applicationBoundaryPackages,
-                                *definition.applicationInteractorPackages,
-                                *definition.implementingInfrastructurePackages,
-                                *definition.consumingInfrastructurePackages,
-                                *definition.mainPartitionPackages)
-            }.toTypedArray(),
-            *definition.domainServicesPackages.map {
-                ArchRuleDefinition.noClasses()
-                        .that().resideInAPackage(it)
-                        .should().accessClassesThat().resideInAnyPackage(
-                                *definition.applicationBoundaryPackages,
-                                *definition.applicationInteractorPackages,
-                                *definition.implementingInfrastructurePackages,
-                                *definition.consumingInfrastructurePackages,
-                                *definition.mainPartitionPackages)
-            }.toTypedArray()
-    )
+    val list = mutableListOf<ArchRule>()
+    val allowedPackages = arrayOf(
+            *definition.domainServicesPackages,
+            *definition.domainServicesWhitelist,
+            *definition.domainModelPackages,
+            *definition.domainModelWhitelist,
+            *definition.whiteListPackages,
+            *definition.sharedVocabularyPackages,
+            *definition.sharedVocabularyWhitelist)
+    definition.domainModelPackages.forEach {
+        list.addAll(getRestrictiveRules(it, *allowedPackages))
+    }
+    definition.domainServicesPackages.forEach {
+        list.addAll(getRestrictiveRules(it, *allowedPackages))
+    }
+    return list.toTypedArray()
 }
 
 fun consumingInfraRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return definition.consumingInfrastructurePackages.map {
-        ArchRuleDefinition.noClasses()
-                .that().resideInAPackage(it)
-                .should().accessClassesThat().resideInAnyPackage(
-                        *definition.implementingInfrastructurePackages,
-                        *definition.domainServicesPackages,
-                        *definition.domainModelPackages,
-                        *definition.applicationInteractorPackages,
-                        *definition.mainPartitionPackages)
-    }.toTypedArray()
+    val list = mutableListOf<ArchRule>()
+    definition.consumingInfrastructurePackages.forEach {
+        val allowedPackages = arrayOf(*definition.implementingInfrastructurePackages,
+                *definition.applicationBoundaryPackages,
+                *definition.consumingInfrastructurePackages,
+                *definition.consumingInfrastructureWhitelist,
+                *definition.whiteListPackages,
+                *definition.sharedVocabularyPackages,
+                *definition.sharedVocabularyWhitelist)
+        list.addAll(getRestrictiveRules(it, *allowedPackages))
+
+    }
+    return list.toTypedArray()
 }
 
 
 fun implementingInfraRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return definition.implementingInfrastructurePackages.map {
-        ArchRuleDefinition.noClasses()
-                .that().resideInAPackage(it)
-                .should().accessClassesThat().resideInAnyPackage(
-                        *definition.consumingInfrastructurePackages,
-                        *definition.applicationBoundaryPackages,
-                        *definition.applicationInteractorPackages,
-                        *definition.mainPartitionPackages)
-    }.toTypedArray()
+    val list = mutableListOf<ArchRule>()
+    val allowedPackages = arrayOf(*definition.implementingInfrastructurePackages,
+            *definition.implementingInfrastructureWhitelist,
+            *definition.domainServicesPackages,
+            *definition.domainServicesWhitelist,
+            *definition.domainModelPackages,
+            *definition.domainModelWhitelist,
+            *definition.whiteListPackages,
+            *definition.sharedVocabularyPackages,
+            *definition.sharedVocabularyWhitelist)
+    definition.implementingInfrastructurePackages.map {
+        getRestrictiveRules(it, *allowedPackages)
+    }.forEach {
+        list.addAll(it)
+    }
+   return list.toTypedArray()
+}
+
+fun getRestrictiveRules(sourcePackage: String, vararg allowedPackages: String): List<ArchRule> {
+    val list = mutableListOf<ArchRule>()
+    list.add(ArchRuleDefinition.classes()
+            .that().resideInAPackage(sourcePackage)
+            .should().onlyAccessClassesThat().resideInAnyPackage(*allowedPackages))
+    list.add(ArchRuleDefinition.classes()
+            .that().resideInAPackage(sourcePackage)
+            .should().onlyDependOnClassesThat().resideInAnyPackage(*allowedPackages))
+    list.add(ArchRuleDefinition.classes()
+            .that().resideInAPackage(sourcePackage)
+            .should(onlyBeAnnotatedWithClassesInPackage(*allowedPackages)))
+    return list
+}
+
+fun onlyBeAnnotatedWithClassesInPackage(vararg allowedPackages: String): ArchCondition<JavaClass> {
+    return OnlyAnnotatedWithClassesInPackage(*allowedPackages)
+}
+
+private class OnlyAnnotatedWithClassesInPackage internal constructor(private vararg val allowedPackages: String) : ArchCondition<JavaClass>("Only annotated with classes in package") {
+    override fun check(item: JavaClass, events: ConditionEvents?) {
+        val annotations = item.annotations
+        annotations.forEach {
+            val match = PackageMatchers.of(*allowedPackages).apply(it.rawType.`package`.name)
+            if(!match) {
+                events!!.violating.add(SimpleConditionEvent(item, false, "${item.name} has annotation that is not in allowed package: ${it.rawType.name}"))
+            }
+        }
+        item.fields.forEach { field ->
+            val fieldAnnotations = field.annotations
+            fieldAnnotations.forEach {
+                val match = PackageMatchers.of(*allowedPackages).apply(it.rawType.`package`.name)
+                if(!match) {
+                    events!!.violating.add(SimpleConditionEvent(item, false, "${item.name} has field (${field.name}) with annotation that is not in allowed package: ${it.rawType.name}"))
+                }
+            }
+        }
+        item.methods.forEach { method ->
+            val fieldAnnotations = method.annotations
+            fieldAnnotations.forEach {
+                val match = PackageMatchers.of(*allowedPackages).apply(it.rawType.`package`.name)
+                if(!match) {
+                    events!!.violating.add(SimpleConditionEvent(item, false, "${item.name} has method (${method.name}) with annotation that is not in allowed package: ${it.rawType.name}"))
+                }
+            }
+        }
+    }
 }
 
 fun sharedVocabularyRules(definition: BoundedContextDefinition): Array<ArchRule> {
-    return definition.sharedVocabularyPackages.map {
-        ArchRuleDefinition.noClasses()
-                .that().resideInAPackage(it)
-                .should().accessClassesThat().resideInAnyPackage(
-                        *definition.implementingInfrastructurePackages,
-                        *definition.consumingInfrastructurePackages,
-                        *definition.applicationBoundaryPackages,
-                        *definition.domainServicesPackages,
-                        *definition.domainModelPackages,
-                        *definition.applicationInteractorPackages,
-                        *definition.mainPartitionPackages)
-    }.toTypedArray()
+    val list = mutableListOf<ArchRule>()
+    val allowedPackages = arrayOf(
+            *definition.sharedVocabularyPackages,
+            *definition.whiteListPackages,
+            *definition.sharedVocabularyWhitelist
+    )
+    definition.sharedVocabularyPackages.map {
+        getRestrictiveRules(it, *allowedPackages)
+    }.forEach {
+        list.addAll(it)
+    }
+    return list.toTypedArray()
 }
