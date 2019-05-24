@@ -11,71 +11,71 @@ import org.junit.jupiter.params.provider.MethodSource
 class CleanArchitectureTests {
     private val classes = ClassFileImporter().importPackages("be.sourcedbvba.restbucks.order..")
 
-    val architecture = cleanArchitecture {
-        boundedContext("be.sourcedbvba.restbucks.order") {
-            whiteList = listOf(
-                    "java.lang..",
-                    "java.util..",
-                    "java.math..",
-                    "kotlin..",
-                    "org.jetbrains.annotations.."
-            )
+val architecture = cleanArchitecture {
+    boundedContext("be.sourcedbvba.restbucks.order") {
+        whiteList = listOf(
+                "java.lang..",
+                "java.util..",
+                "java.math..",
+                "kotlin..",
+                "org.jetbrains.annotations.."
+        )
 
-            application {
-                boundary {
-                    subPackage = "api.."
-                }
-                interactor {
-                    subPackage = "impl.."
-                }
+        application {
+            boundary {
+                subPackage = "api.."
             }
-            domain {
-                model {
-                    subPackage = "domain.model.."
-                }
-                services {
-                    subPackage = "domain.services.."
-                }
+            interactor {
+                subPackage = "impl.."
             }
-            infrastructure {
-                consuming {
-                    subPackage = "infra.web.."
-                    whiteList = listOf(
-                            "org.springframework.web..",
-                            "org.springframework.http..",
-                            "reactor.core.."
-                    )
-                }
-                implementing {
-                    subPackage = "infra.persistence.."
-                    whiteList = listOf(
-                            "org.springframework.transaction..",
-                            "org.aspectj..",
-                            "org.springframework.data..",
-                            "javax.persistence.."
-                    )
-                }
+        }
+        domain {
+            model {
+                subPackage = "domain.model.."
             }
-            shared {
-                vocabulary {
-                    subPackage = "shared.vocabulary.."
-                }
+            services {
+                subPackage = "domain.services.."
             }
-            mainPartition {
-                subPackage = "main.."
+        }
+        infrastructure {
+            consuming {
+                subPackage = "infra.web.."
                 whiteList = listOf(
-                        "org.springframework.context..",
-                        "org.springframework.orm..",
-                        "org.springframework.core..",
-                        "org.springframework.boot..",
-                        "org.springframework.scheduling..",
-                        "org.springframework.transaction..",
                         "org.springframework.web..",
-                        "javax.."
+                        "org.springframework.http..",
+                        "reactor.core.."
+                )
+            }
+            implementing {
+                subPackage = "infra.persistence.."
+                whiteList = listOf(
+                        "org.springframework.transaction..",
+                        "org.aspectj..",
+                        "org.springframework.data..",
+                        "javax.persistence.."
                 )
             }
         }
+        shared {
+            vocabulary {
+                subPackage = "shared.vocabulary.."
+            }
+        }
+        mainPartition {
+            subPackage = "main.."
+            whiteList = listOf(
+                    "org.springframework.context..",
+                    "org.springframework.orm..",
+                    "org.springframework.core..",
+                    "org.springframework.boot..",
+                    "org.springframework.scheduling..",
+                    "org.springframework.transaction..",
+                    "org.springframework.web..",
+                    "javax.."
+            )
+        }
     }
+}
 
     @ParameterizedTest(name = "{index}: {1}")
     @MethodSource("ruleParametersProvider")
