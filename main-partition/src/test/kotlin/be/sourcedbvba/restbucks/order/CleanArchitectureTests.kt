@@ -13,7 +13,13 @@ class CleanArchitectureTests {
 
     val architecture = cleanArchitecture {
         boundedContext("be.sourcedbvba.restbucks.order") {
-            whiteList = listOf("java.lang..", "java.util..", "java.math..", "kotlin..", "org.jetbrains.annotations..")
+            whiteList = listOf(
+                    "java.lang..",
+                    "java.util..",
+                    "java.math..",
+                    "kotlin..",
+                    "org.jetbrains.annotations.."
+            )
 
             application {
                 boundary {
@@ -34,11 +40,20 @@ class CleanArchitectureTests {
             infrastructure {
                 consuming {
                     subPackage = "infra.web.."
-                    whiteList = listOf("org.springframework.web..", "org.springframework.http..", "reactor.core..")
+                    whiteList = listOf(
+                            "org.springframework.web..",
+                            "org.springframework.http..",
+                            "reactor.core.."
+                    )
                 }
                 implementing {
                     subPackage = "infra.persistence.."
-                    whiteList = listOf("org.springframework.transaction..", "org.aspectj..", "org.springframework.data..", "javax.persistence..")
+                    whiteList = listOf(
+                            "org.springframework.transaction..",
+                            "org.aspectj..",
+                            "org.springframework.data..",
+                            "javax.persistence.."
+                    )
                 }
             }
             shared {
@@ -48,7 +63,16 @@ class CleanArchitectureTests {
             }
             mainPartition {
                 subPackage = "main.."
-                whiteList = listOf("org.springframework..", "javax..")
+                whiteList = listOf(
+                        "org.springframework.context..",
+                        "org.springframework.orm..",
+                        "org.springframework.core..",
+                        "org.springframework.boot..",
+                        "org.springframework.scheduling..",
+                        "org.springframework.transaction..",
+                        "org.springframework.web..",
+                        "javax.."
+                )
             }
         }
     }

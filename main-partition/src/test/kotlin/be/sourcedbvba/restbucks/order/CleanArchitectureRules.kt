@@ -44,8 +44,7 @@ fun applicationApiRules(definition: BoundedContextDefinition): Array<ArchRule> {
             *definition.whiteListPackages,
             *definition.applicationBoundaryPackages,
             *definition.applicationBoundaryWhitelist,
-            *definition.sharedVocabularyPackages,
-            *definition.sharedVocabularyWhitelist
+            *definition.sharedVocabularyPackages
     )
     definition.applicationBoundaryPackages.map {
         getRestrictiveRules(it, *allowedPackages)
@@ -59,15 +58,13 @@ fun applicationApiRules(definition: BoundedContextDefinition): Array<ArchRule> {
 fun applicationImplRules(definition: BoundedContextDefinition): Array<ArchRule> {
     val list = mutableListOf<ArchRule>()
     val allowedPackages = arrayOf(
-            *definition.applicationBoundaryPackages,
+            *definition.whiteListPackages,
             *definition.applicationInteractorPackages,
+            *definition.applicationInteractorWhitelist,
+            *definition.applicationBoundaryPackages,
             *definition.domainModelPackages,
             *definition.domainServicesPackages,
-            *definition.whiteListPackages,
-            *definition.applicationBoundaryWhitelist,
-            *definition.applicationInteractorWhitelist,
-            *definition.sharedVocabularyPackages,
-            *definition.sharedVocabularyWhitelist
+            *definition.sharedVocabularyPackages
     )
     definition.applicationInteractorPackages.map {
         getRestrictiveRules(it, *allowedPackages)
@@ -80,13 +77,12 @@ fun applicationImplRules(definition: BoundedContextDefinition): Array<ArchRule> 
 fun domainRules(definition: BoundedContextDefinition): Array<ArchRule> {
     val list = mutableListOf<ArchRule>()
     val allowedPackages = arrayOf(
+            *definition.whiteListPackages,
             *definition.domainServicesPackages,
             *definition.domainServicesWhitelist,
             *definition.domainModelPackages,
             *definition.domainModelWhitelist,
-            *definition.whiteListPackages,
-            *definition.sharedVocabularyPackages,
-            *definition.sharedVocabularyWhitelist)
+            *definition.sharedVocabularyPackages)
     definition.domainModelPackages.forEach {
         list.addAll(getRestrictiveRules(it, *allowedPackages))
     }
@@ -100,12 +96,11 @@ fun consumingInfraRules(definition: BoundedContextDefinition): Array<ArchRule> {
     val list = mutableListOf<ArchRule>()
     definition.consumingInfrastructurePackages.forEach {
         val allowedPackages = arrayOf(*definition.implementingInfrastructurePackages,
-                *definition.applicationBoundaryPackages,
+                *definition.whiteListPackages,
                 *definition.consumingInfrastructurePackages,
                 *definition.consumingInfrastructureWhitelist,
-                *definition.whiteListPackages,
-                *definition.sharedVocabularyPackages,
-                *definition.sharedVocabularyWhitelist)
+                *definition.applicationBoundaryPackages,
+                *definition.sharedVocabularyPackages)
         list.addAll(getRestrictiveRules(it, *allowedPackages))
 
     }
@@ -116,14 +111,11 @@ fun consumingInfraRules(definition: BoundedContextDefinition): Array<ArchRule> {
 fun implementingInfraRules(definition: BoundedContextDefinition): Array<ArchRule> {
     val list = mutableListOf<ArchRule>()
     val allowedPackages = arrayOf(*definition.implementingInfrastructurePackages,
+            *definition.whiteListPackages,
             *definition.implementingInfrastructureWhitelist,
             *definition.domainServicesPackages,
-            *definition.domainServicesWhitelist,
             *definition.domainModelPackages,
-            *definition.domainModelWhitelist,
-            *definition.whiteListPackages,
-            *definition.sharedVocabularyPackages,
-            *definition.sharedVocabularyWhitelist)
+            *definition.sharedVocabularyPackages)
     definition.implementingInfrastructurePackages.map {
         getRestrictiveRules(it, *allowedPackages)
     }.forEach {
@@ -202,17 +194,11 @@ fun mainPartitionRules(definition: BoundedContextDefinition): Array<ArchRule> {
             *definition.mainPartitionPackages,
             *definition.mainPartitionWhitelist,
             *definition.implementingInfrastructurePackages,
-            *definition.implementingInfrastructureWhitelist,
             *definition.consumingInfrastructurePackages,
-            *definition.consumingInfrastructureWhitelist,
             *definition.applicationBoundaryPackages,
-            *definition.applicationBoundaryWhitelist,
             *definition.applicationInteractorPackages,
-            *definition.applicationInteractorWhitelist,
             *definition.domainServicesPackages,
-            *definition.domainServicesWhitelist,
-            *definition.domainModelPackages,
-            *definition.domainModelWhitelist
+            *definition.domainModelPackages
     )
     definition.mainPartitionPackages.map {
         getRestrictiveRules(it, *allowedPackages)

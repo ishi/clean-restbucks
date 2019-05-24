@@ -17,6 +17,6 @@ data class OrderEntity(
         @Enumerated var status: Status,
         val cost: BigDecimal,
         @OneToMany(cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    @JoinColumn(name = "order_id")
-    val items: List<OrderItemEntity>
+        @JoinColumn(name = "order_id")
+        val items: List<OrderItemEntity>
 )

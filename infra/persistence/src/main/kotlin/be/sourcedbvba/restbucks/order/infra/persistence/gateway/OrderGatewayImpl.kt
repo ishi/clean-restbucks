@@ -19,11 +19,11 @@ class OrderGatewayImpl constructor(private val orderRepository: OrderRepository)
         return orderRepository.findAll().map { it.toDomain() }
     }
 
-    internal fun OrderEntity.toDomain(): Order {
+    private fun OrderEntity.toDomain(): Order {
         return Order(OrderId(id), customerName, status, OrderItems(items.map { it.toDomain() }))
     }
 
-    internal fun OrderItemEntity.toDomain(): OrderItem {
+    private fun OrderItemEntity.toDomain(): OrderItem {
         return OrderItem(product, quantity, size, milk)
     }
 }
