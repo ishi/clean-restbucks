@@ -36,66 +36,25 @@ class OrderRouterFactory(
         private val deliverOrder: DeliverOrder,
         private val payOrder: PayOrder
 ) {
-    private fun createOrder(request: ServerRequest): Mono<ServerResponse> {
-        val receiver = CreateOrderJsonReceiver()
-        return request.bodyToMono(CreateOrderRequest::class.java).flatMap {
-            createOrder.create(it, receiver)
-            receiver.result
-        }
-    }
-
-    private fun headOrders(request: ServerRequest): Mono<ServerResponse> {
-        return ServerResponse.ok().build()
-    }
-
-    private fun home(request: ServerRequest): Mono<ServerResponse> {
-        return ServerResponse.ok().build()
-    }
-
-    private fun getOrders(request: ServerRequest): Mono<ServerResponse> {
-        val receiver = GetOrdersJsonReceiver()
-        getOrders.getOrders(receiver)
-        return receiver.result
-    }
-
-    private fun getOrderStatus(request: ServerRequest): Mono<ServerResponse> {
-        val receiver = GetOrderStatusJsonReceiver()
-        val orderId = request.pathVariable("id")
-        getOrderStatus.getStatus(GetOrderStatusRequest(orderId), receiver)
-        return receiver.result
-    }
-
-    private fun payForOrder(request: ServerRequest): Mono<ServerResponse> {
-        val orderId = request.pathVariable("id")
-        payOrder.pay(PayOrderRequest(orderId))
-        return ServerResponse.ok().build()
-    }
-
-    private fun deliverOrder(request: ServerRequest): Mono<ServerResponse> {
-        val orderId = request.pathVariable("id")
-        deliverOrder.deliver(DeliverOrderRequest(orderId))
-        return ServerResponse.ok().build()
-    }
-
-    private fun deleteOrder(request: ServerRequest): Mono<ServerResponse> {
-        val orderId = request.pathVariable("id")
-        deleteOrder.delete(DeleteOrderRequest(orderId))
-        return ServerResponse.ok().build()
-    }
 
     fun create() = router {
-        GET("/").invoke(this@OrderRouterFactory::home)
-        GET("/order").invoke(this@OrderRouterFactory::getOrders)
-        HEAD("/order").invoke(this@OrderRouterFactory::headOrders)
-        POST("/order").and(contentType(MediaType.APPLICATION_JSON)).invoke(this@OrderRouterFactory::createOrder)
-        POST("/order/{id}/payment").invoke(this@OrderRouterFactory::payForOrder)
-        POST("/order/{id}/delivery").invoke(this@OrderRouterFactory::deliverOrder)
-        GET("/order/{id}/status").invoke(this@OrderRouterFactory::getOrderStatus)
-        DELETE("/order/{id}").invoke(this@OrderRouterFactory::deleteOrder)
+        GET("/").invoke { home() }
+        GET("/order").invoke { getOrders(getOrders)}
+        HEAD("/order").invoke { headOrders() }
+        POST("/order").and(contentType(MediaType.APPLICATION_JSON)).invoke { r -> createOrder(r, createOrder) }
+        POST("/order/{id}/payment").invoke { r -> payForOrder(r, payOrder) }
+        POST("/order/{id}/delivery").invoke { r -> deliverOrder(r, deliverOrder) }
+        GET("/order/{id}/status").invoke { r -> getOrderStatus(r, getOrderStatus) }
+        DELETE("/order/{id}").invoke { r -> deleteOrder(r, deleteOrder) }
     }
+}
 
-    private class CreateOrderJsonReceiver : CreateOrderReceiver {
-        internal lateinit var result: Mono<ServerResponse>
+internal fun createOrder(request: ServerRequest, createOrder: CreateOrder): Mono<ServerResponse> {
+    data class HalLink(val href: String)
+    data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
+
+    class CreateOrderJsonReceiver : CreateOrderReceiver {
+        lateinit var result: Mono<ServerResponse>
             private set
 
         override fun receive(response: CreateOrderResponse) {
@@ -104,17 +63,32 @@ class OrderRouterFactory(
                     .body(Mono.just(response.toResponseBody()), CreateOrderResponseBody::class.java)
         }
 
-        private data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
-        private data class HalLink(val href: String)
-
         private fun CreateOrderResponse.toResponseBody(): CreateOrderResponseBody {
             val links = mapOf(Pair("status", HalLink("/$id/status")))
             return CreateOrderResponseBody(id, customer, amount, links)
         }
     }
 
-    private class GetOrdersJsonReceiver : GetOrdersReceiver {
-        internal lateinit var result: Mono<ServerResponse>
+    val receiver = CreateOrderJsonReceiver()
+    return request.bodyToMono(CreateOrderRequest::class.java).flatMap {
+        createOrder.create(it, receiver)
+        receiver.result
+    }
+}
+
+internal fun headOrders(): Mono<ServerResponse> {
+    return ServerResponse.ok().build()
+}
+
+internal fun home(): Mono<ServerResponse> {
+    return ServerResponse.ok().build()
+}
+
+internal fun getOrders(getOrders: GetOrders): Mono<ServerResponse> {
+    data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
+
+    class GetOrdersJsonReceiver : GetOrdersReceiver {
+        lateinit var result: Mono<ServerResponse>
             private set
 
         override fun receive(response: GetOrdersResponses) {
@@ -124,19 +98,48 @@ class OrderRouterFactory(
                     .body(Flux.fromIterable(mapped), GetOrdersResponseBody::class.java)
         }
 
-        private data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
-
         private fun GetOrdersResponse.toResponseBody(): GetOrdersResponseBody {
             return GetOrdersResponseBody(id, customer, status.name.toLowerCase())
         }
     }
 
-    private class GetOrderStatusJsonReceiver : GetOrderStatusReceiver {
-        internal lateinit var result: Mono<ServerResponse>
+
+
+    val receiver = GetOrdersJsonReceiver()
+    getOrders.getOrders(receiver)
+    return receiver.result
+}
+
+internal fun getOrderStatus(request: ServerRequest, getOrderStatus: GetOrderStatus): Mono<ServerResponse> {
+    class GetOrderStatusJsonReceiver : GetOrderStatusReceiver {
+        lateinit var result: Mono<ServerResponse>
             private set
 
         override fun receive(response: GetOrderStatusResponse) {
             result = ServerResponse.ok().body(Mono.just(response.status), Status::class.java)
         }
     }
+
+    val receiver = GetOrderStatusJsonReceiver()
+    val orderId = request.pathVariable("id")
+    getOrderStatus.getStatus(GetOrderStatusRequest(orderId), receiver)
+    return receiver.result
+}
+
+internal fun payForOrder(request: ServerRequest, payOrder: PayOrder): Mono<ServerResponse> {
+    val orderId = request.pathVariable("id")
+    payOrder.pay(PayOrderRequest(orderId))
+    return ServerResponse.ok().build()
+}
+
+internal fun deliverOrder(request: ServerRequest, deliverOrder: DeliverOrder): Mono<ServerResponse> {
+    val orderId = request.pathVariable("id")
+    deliverOrder.deliver(DeliverOrderRequest(orderId))
+    return ServerResponse.ok().build()
+}
+
+internal fun deleteOrder(request: ServerRequest, deleteOrder: DeleteOrder): Mono<ServerResponse> {
+    val orderId = request.pathVariable("id")
+    deleteOrder.delete(DeleteOrderRequest(orderId))
+    return ServerResponse.ok().build()
 }
