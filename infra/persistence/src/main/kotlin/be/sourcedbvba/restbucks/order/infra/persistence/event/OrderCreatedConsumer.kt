@@ -1,28 +1,23 @@
 package be.sourcedbvba.restbucks.order.infra.persistence.event
 
-import be.sourcedbvba.restbucks.order.domain.services.event.DomainEvent
-import be.sourcedbvba.restbucks.order.domain.services.event.DomainEventConsumer
-import be.sourcedbvba.restbucks.order.domain.services.event.OrderCreated
-import be.sourcedbvba.restbucks.order.domain.services.event.OrderItemState
-import be.sourcedbvba.restbucks.order.domain.services.event.OrderState
+import be.sourcedbvba.restbucks.order.domain.services.event.*
 import be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa.OrderEntity
 import be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa.OrderItemEntity
-import be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa.OrderRepository
-import java.util.UUID
+import java.util.*
 
-class OrderCreatedConsumer constructor(private val orderRepository: OrderRepository) : DomainEventConsumer {
-    override fun canHandle(event: DomainEvent) = event is OrderCreated
+val orderCreatedConsumer = { save: (OrderEntity) -> OrderEntity, event: DomainEvent ->
+    run {
+        if(event is OrderCreated) {
+            fun OrderItemState.toJpa(): OrderItemEntity {
+                return OrderItemEntity(UUID.randomUUID().toString(), productName, quantity, size, milk)
+            }
 
-    override fun consume(event: DomainEvent) {
-        val orderEntity = (event as OrderCreated).getOrder().toJpa()
-        orderRepository.save(orderEntity)
-    }
+            fun OrderState.toJpa(): OrderEntity {
+                return OrderEntity(id.value, customer, status, cost, items.map { it.toJpa() })
+            }
 
-    private fun OrderState.toJpa(): OrderEntity {
-        return OrderEntity(id.value, customer, status, cost, items.map { it.toJpa() })
-    }
-
-    private fun OrderItemState.toJpa(): OrderItemEntity {
-        return OrderItemEntity(UUID.randomUUID().toString(), productName, quantity, size, milk)
+            val orderEntity = event.getOrder().toJpa()
+            save(orderEntity)
+        }
     }
 }

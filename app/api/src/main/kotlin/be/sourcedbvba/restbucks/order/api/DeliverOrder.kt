@@ -1,7 +1,5 @@
 package be.sourcedbvba.restbucks.order.api
 
-interface DeliverOrder {
-    fun deliver(request: DeliverOrderRequest)
-}
+typealias DeliverOrder = (DeliverOrderRequest) -> Unit
 
 data class DeliverOrderRequest(val orderId: String)

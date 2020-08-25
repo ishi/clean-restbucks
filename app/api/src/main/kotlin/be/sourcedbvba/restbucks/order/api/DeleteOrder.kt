@@ -1,7 +1,5 @@
 package be.sourcedbvba.restbucks.order.api
 
-interface DeleteOrder {
-    fun delete(request: DeleteOrderRequest)
-}
+typealias DeleteOrder = (DeleteOrderRequest) -> Unit
 
 data class DeleteOrderRequest(val orderId: String)

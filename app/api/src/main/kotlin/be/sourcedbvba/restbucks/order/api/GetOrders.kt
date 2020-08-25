@@ -4,11 +4,7 @@ import be.sourcedbvba.restbucks.order.shared.vocabulary.Milk
 import be.sourcedbvba.restbucks.order.shared.vocabulary.Size
 import be.sourcedbvba.restbucks.order.shared.vocabulary.Status
 
-interface GetOrders {
-    fun getOrders(presenter: GetOrdersReceiver)
-}
-
-typealias GetOrdersResponses = List<GetOrdersResponse>
+typealias GetOrders = () -> List<GetOrdersResponse>
 
 data class GetOrdersResponse(
         val id: String,
@@ -22,7 +18,3 @@ data class GetOrdersResponseItem(
         val size: Size,
         val milk: Milk
 )
-
-interface GetOrdersReceiver {
-    fun receive(response: GetOrdersResponses)
-}

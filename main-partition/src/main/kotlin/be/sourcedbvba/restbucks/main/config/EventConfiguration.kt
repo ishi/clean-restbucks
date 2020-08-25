@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct
 
 @Configuration
 class EventConfiguration(val applicationEventMulticaster: ApplicationEventMulticaster,
-                         val eventConsumers: List<DomainEventConsumer>) {
+                         val eventConsumers: List<(DomainEvent) -> Any>) {
     @PostConstruct
     fun eventPublisher() {
        EventPublisher.Locator.eventPublisher = { event ->
@@ -21,7 +21,7 @@ class EventConfiguration(val applicationEventMulticaster: ApplicationEventMultic
        applicationEventMulticaster.addApplicationListener(ApplicationListener { event: PayloadApplicationEvent<*> ->
            if (event.payload is DomainEvent) {
                val payload = event.payload as DomainEvent
-               eventConsumers.find { it.canHandle(payload) }?.consume(payload)
+               eventConsumers.forEach { it(payload) }
            }
         })
     }

@@ -1,57 +1,34 @@
 package be.sourcedbvba.restbucks.main.config
 
-import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderCreatedConsumer
-import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderDeletedConsumer
-import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderDeliveredConsumer
-import be.sourcedbvba.restbucks.order.infra.persistence.event.OrderPaidConsumer
-import be.sourcedbvba.restbucks.order.infra.persistence.gateway.OrderGatewayImpl
+import arrow.syntax.function.curried
+import be.sourcedbvba.restbucks.order.infra.persistence.event.*
+import be.sourcedbvba.restbucks.order.infra.persistence.gateway.getOrder
+import be.sourcedbvba.restbucks.order.infra.persistence.gateway.getOrders
 import be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa.OrderRepository
 import org.springframework.boot.autoconfigure.domain.EntityScan
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactory
-import org.springframework.orm.jpa.JpaVendorAdapter
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import javax.persistence.EntityManagerFactory
-
-import javax.sql.DataSource
 
 @Configuration
 @EnableJpaRepositories(basePackages = ["be.sourcedbvba.restbucks"])
+@EntityScan(basePackages = ["be.sourcedbvba.restbucks"])
 class PersistenceConfiguration {
     @Bean
-    fun orderCreatedConsumer(orderRepository: OrderRepository) = OrderCreatedConsumer(orderRepository)
+    fun orderCreatedConsumerBean(orderRepository: OrderRepository) = orderCreatedConsumer.curried()(orderRepository::save)
 
     @Bean
-    fun orderDeletedConsumer(orderRepository: OrderRepository) = OrderDeletedConsumer(orderRepository)
+    fun orderDeletedConsumerBean(orderRepository: OrderRepository) = orderDeletedConsumer.curried()(orderRepository::deleteById)
 
     @Bean
-    fun orderDeliveredConsumer(orderRepository: OrderRepository) = OrderDeliveredConsumer(orderRepository)
+    fun orderDeliveredConsumerBean(orderRepository: OrderRepository) = orderDeliveredConsumer.curried()(orderRepository::save)(orderRepository::findById)
 
     @Bean
-    fun orderPaidConsumer(orderRepository: OrderRepository) = OrderPaidConsumer(orderRepository)
+    fun orderPaidConsumerBean(orderRepository: OrderRepository) = orderPaidConsumer.curried()(orderRepository::save)(orderRepository::findById)
 
     @Bean
-    fun orderGateway(orderRepository: OrderRepository) = OrderGatewayImpl(orderRepository)
+    fun orderGatewayGetOrder(orderRepository: OrderRepository) = getOrder.curried()(orderRepository::findById)
 
     @Bean
-    fun entityManagerFactory(
-        jpaVendorAdapter: JpaVendorAdapter,
-        dataSource: DataSource,
-        environment: Environment
-    ): LocalContainerEntityManagerFactoryBean {
-        val threadPoolTaskExecutor = ThreadPoolTaskExecutor()
-        threadPoolTaskExecutor.isDaemon = true
-        threadPoolTaskExecutor.afterPropertiesSet()
-
-        val emf = LocalContainerEntityManagerFactoryBean()
-        emf.bootstrapExecutor = threadPoolTaskExecutor
-        emf.dataSource = dataSource
-        emf.jpaVendorAdapter = jpaVendorAdapter
-        emf.setPackagesToScan("be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa")
-        return emf
-    }
+    fun orderGatewayGetOrders(orderRepository: OrderRepository) = { -> getOrders(orderRepository::findAll) }
 }
