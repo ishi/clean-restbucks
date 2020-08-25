@@ -1,5 +1,6 @@
 package be.sourcedbvba.restbucks.order.infra.web
 
+import arrow.syntax.function.curried
 import be.sourcedbvba.restbucks.order.shared.vocabulary.Status
 import be.sourcedbvba.restbucks.order.api.CreateOrder
 import be.sourcedbvba.restbucks.order.api.CreateOrderReceiver
@@ -38,108 +39,115 @@ class OrderRouterFactory(
 ) {
 
     fun create() = router {
-        GET("/").invoke { home() }
-        GET("/order").invoke { getOrders(getOrders)}
-        HEAD("/order").invoke { headOrders() }
-        POST("/order").and(contentType(MediaType.APPLICATION_JSON)).invoke { r -> createOrder(r, createOrder) }
-        POST("/order/{id}/payment").invoke { r -> payForOrder(r, payOrder) }
-        POST("/order/{id}/delivery").invoke { r -> deliverOrder(r, deliverOrder) }
-        GET("/order/{id}/status").invoke { r -> getOrderStatus(r, getOrderStatus) }
-        DELETE("/order/{id}").invoke { r -> deleteOrder(r, deleteOrder) }
+        GET("/").invoke(homeFn)
+        GET("/order").invoke(getOrdersFn.curried()(getOrders))
+        HEAD("/order").invoke(headOrdersFn)
+        POST("/order").and(contentType(MediaType.APPLICATION_JSON)).invoke(createOrderFn.curried()(createOrder))
+        POST("/order/{id}/payment").invoke(payForOrderFn.curried()(payOrder))
+        POST("/order/{id}/delivery").invoke(deliverOrderFn.curried()(deliverOrder))
+        GET("/order/{id}/status").invoke(getOrderStatusFn.curried()(getOrderStatus))
+        DELETE("/order/{id}").invoke(deleteOrderFn.curried()(deleteOrder))
     }
 }
 
-internal fun createOrder(request: ServerRequest, createOrder: CreateOrder): Mono<ServerResponse> {
-    data class HalLink(val href: String)
-    data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
+data class HalLink(val href: String)
+data class CreateOrderResponseBody(val id: String, val customer: String, val amount: BigDecimal, val _links: Map<String, HalLink>)
 
-    class CreateOrderJsonReceiver : CreateOrderReceiver {
-        lateinit var result: Mono<ServerResponse>
-            private set
+private val createOrderFn = { createOrder: CreateOrder, request: ServerRequest  ->
+    run {
+        class CreateOrderJsonReceiver : CreateOrderReceiver {
+            lateinit var result: Mono<ServerResponse>
+                private set
 
-        override fun receive(response: CreateOrderResponse) {
-            result = ServerResponse
-                    .ok()
-                    .body(Mono.just(response.toResponseBody()), CreateOrderResponseBody::class.java)
+            override fun receive(response: CreateOrderResponse) {
+                result = ServerResponse
+                        .ok()
+                        .body(Mono.just(response.toResponseBody()), CreateOrderResponseBody::class.java)
+            }
+
+            private fun CreateOrderResponse.toResponseBody(): CreateOrderResponseBody {
+                val links = mapOf(Pair("status", HalLink("/$id/status")))
+                return CreateOrderResponseBody(id, customer, amount, links)
+            }
         }
 
-        private fun CreateOrderResponse.toResponseBody(): CreateOrderResponseBody {
-            val links = mapOf(Pair("status", HalLink("/$id/status")))
-            return CreateOrderResponseBody(id, customer, amount, links)
+        val receiver = CreateOrderJsonReceiver()
+        request.bodyToMono(CreateOrderRequest::class.java).flatMap {
+            createOrder.create(it, receiver)
+            receiver.result
         }
     }
+}
 
-    val receiver = CreateOrderJsonReceiver()
-    return request.bodyToMono(CreateOrderRequest::class.java).flatMap {
-        createOrder.create(it, receiver)
+private val simpleOkResponseFn = { serverRequest: ServerRequest -> ServerResponse.ok().build() }
+
+private val headOrdersFn = simpleOkResponseFn
+private val homeFn = simpleOkResponseFn
+
+data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
+
+private val getOrdersFn = { getOrders: GetOrders, request: ServerRequest ->
+    run {
+        class GetOrdersJsonReceiver : GetOrdersReceiver {
+            lateinit var result: Mono<ServerResponse>
+                private set
+
+            override fun receive(response: GetOrdersResponses) {
+                val mapped: List<GetOrdersResponseBody> = response.stream().map { it.toResponseBody() }.collect(Collectors.toList())
+                result = ServerResponse
+                        .ok()
+                        .body(Flux.fromIterable(mapped), GetOrdersResponseBody::class.java)
+            }
+
+            private fun GetOrdersResponse.toResponseBody(): GetOrdersResponseBody {
+                return GetOrdersResponseBody(id, customer, status.name.toLowerCase())
+            }
+        }
+
+        val receiver = GetOrdersJsonReceiver()
+        getOrders.getOrders(receiver)
         receiver.result
     }
 }
 
-internal fun headOrders(): Mono<ServerResponse> {
-    return ServerResponse.ok().build()
-}
+private val getOrderStatusFn = { getOrderStatus: GetOrderStatus, request: ServerRequest ->
+    run {
+        class GetOrderStatusJsonReceiver : GetOrderStatusReceiver {
+            lateinit var result: Mono<ServerResponse>
+                private set
 
-internal fun home(): Mono<ServerResponse> {
-    return ServerResponse.ok().build()
-}
-
-internal fun getOrders(getOrders: GetOrders): Mono<ServerResponse> {
-    data class GetOrdersResponseBody(val id: String, val customer: String, val status: String)
-
-    class GetOrdersJsonReceiver : GetOrdersReceiver {
-        lateinit var result: Mono<ServerResponse>
-            private set
-
-        override fun receive(response: GetOrdersResponses) {
-            val mapped: List<GetOrdersResponseBody> = response.stream().map { it.toResponseBody() }.collect(Collectors.toList())
-            result = ServerResponse
-                    .ok()
-                    .body(Flux.fromIterable(mapped), GetOrdersResponseBody::class.java)
+            override fun receive(response: GetOrderStatusResponse) {
+                result = ServerResponse.ok().body(Mono.just(response.status), Status::class.java)
+            }
         }
 
-        private fun GetOrdersResponse.toResponseBody(): GetOrdersResponseBody {
-            return GetOrdersResponseBody(id, customer, status.name.toLowerCase())
-        }
+        val receiver = GetOrderStatusJsonReceiver()
+        val orderId = request.pathVariable("id")
+        getOrderStatus.getStatus(GetOrderStatusRequest(orderId), receiver)
+        receiver.result
     }
-
-
-
-    val receiver = GetOrdersJsonReceiver()
-    getOrders.getOrders(receiver)
-    return receiver.result
 }
 
-internal fun getOrderStatus(request: ServerRequest, getOrderStatus: GetOrderStatus): Mono<ServerResponse> {
-    class GetOrderStatusJsonReceiver : GetOrderStatusReceiver {
-        lateinit var result: Mono<ServerResponse>
-            private set
-
-        override fun receive(response: GetOrderStatusResponse) {
-            result = ServerResponse.ok().body(Mono.just(response.status), Status::class.java)
-        }
+private val payForOrderFn = { payOrder: PayOrder, request: ServerRequest ->
+    run {
+        val orderId = request.pathVariable("id")
+        payOrder.pay(PayOrderRequest(orderId))
+        ServerResponse.ok().build()
     }
-
-    val receiver = GetOrderStatusJsonReceiver()
-    val orderId = request.pathVariable("id")
-    getOrderStatus.getStatus(GetOrderStatusRequest(orderId), receiver)
-    return receiver.result
 }
 
-internal fun payForOrder(request: ServerRequest, payOrder: PayOrder): Mono<ServerResponse> {
-    val orderId = request.pathVariable("id")
-    payOrder.pay(PayOrderRequest(orderId))
-    return ServerResponse.ok().build()
+private val deliverOrderFn = { deliverOrder: DeliverOrder, request: ServerRequest ->
+    run {
+        val orderId = request.pathVariable("id")
+        deliverOrder.deliver(DeliverOrderRequest(orderId))
+        ServerResponse.ok().build()
+    }
 }
 
-internal fun deliverOrder(request: ServerRequest, deliverOrder: DeliverOrder): Mono<ServerResponse> {
-    val orderId = request.pathVariable("id")
-    deliverOrder.deliver(DeliverOrderRequest(orderId))
-    return ServerResponse.ok().build()
-}
-
-internal fun deleteOrder(request: ServerRequest, deleteOrder: DeleteOrder): Mono<ServerResponse> {
-    val orderId = request.pathVariable("id")
-    deleteOrder.delete(DeleteOrderRequest(orderId))
-    return ServerResponse.ok().build()
+private val deleteOrderFn = { deleteOrder: DeleteOrder, request: ServerRequest ->
+    run {
+        val orderId = request.pathVariable("id")
+        deleteOrder.delete(DeleteOrderRequest(orderId))
+        ServerResponse.ok().build()
+    }
 }

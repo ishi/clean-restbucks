@@ -11,10 +11,7 @@ import java.lang.Exception
 
 @Aspect
 class TransactionalUseCaseAspect(private val transactionManager: PlatformTransactionManager) {
-    @Pointcut("@within(useCase)")
-    fun withinUseCase(useCase: UseCase) {}
-
-    @Around("withinUseCase(useCase)")
+    @Around("@within(useCase)")
     fun withinUseCase(pjp: ProceedingJoinPoint, useCase: UseCase) {
         if (useCase.transactional) {
             val tx = transactionManager.getTransaction(DefaultTransactionDefinition())
