@@ -21,7 +21,6 @@ import javax.sql.DataSource
 
 @Configuration
 @EnableJpaRepositories(basePackages = ["be.sourcedbvba.restbucks"])
-@EntityScan(basePackages = ["be.sourcedbvba.restbucks"])
 class PersistenceConfiguration {
     @Bean
     fun orderCreatedConsumer(orderRepository: OrderRepository) = OrderCreatedConsumer(orderRepository)
@@ -52,7 +51,7 @@ class PersistenceConfiguration {
         emf.bootstrapExecutor = threadPoolTaskExecutor
         emf.dataSource = dataSource
         emf.jpaVendorAdapter = jpaVendorAdapter
-        emf.setPackagesToScan("be.sourcedbvba.restbucks.order.gateway.jpa")
+        emf.setPackagesToScan("be.sourcedbvba.restbucks.order.infra.persistence.gateway.jpa")
         return emf
     }
 }

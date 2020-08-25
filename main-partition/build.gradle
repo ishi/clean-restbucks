@@ -4,7 +4,7 @@
  * Linking everything together into an executable application
  */
 plugins {
-    id "org.jetbrains.kotlin.plugin.spring" version "1.2.41"
+    id "org.jetbrains.kotlin.plugin.spring" version "1.3.72"
 }
 
 test {
